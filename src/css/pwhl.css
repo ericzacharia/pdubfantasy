@@ -1,0 +1,73 @@
+/* PWHL Fantasy Hockey Styles */
+
+/* Scrollable table wrapper */
+.pwhl-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pwhl-table-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.pwhl-table-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.pwhl-table-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.pwhl-table-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Filter chips */
+.pwhl-filter-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pwhl-filter-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.pwhl-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.pwhl-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pwhl-chip.active {
+  background: rgba(255, 124, 222, 0.15);
+  border-color: rgba(255, 124, 222, 0.4);
+  color: var(--pink);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pwhl-teams-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pwhl-news-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

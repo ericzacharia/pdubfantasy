@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
 import { pwhlFantasyAPI } from '../../services/pwhlAPI';
+import PlayerAvatar from '../PlayerAvatar';
 
 const POS_COLORS = { F: '#8b5cf6', C: '#8b5cf6', LW: '#8b5cf6', RW: '#8b5cf6', D: '#3b82f6', G: '#f59e0b', UTIL: '#6366f1', BN: 'rgba(255,255,255,0.2)', IR: '#ef4444' };
 
@@ -287,17 +288,19 @@ const MyTeamView = () => {
 const ROSTER_WIDTHS = ['160px', '50px', '55px', '45px', '45px', '45px', '50px', '50px', '60px', '60px'];
 
 const RosterRow = ({ player, isSkatersView }) => {
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
   const stats = player;
   return (
     <div
-      style={{ ...styles.tableRow, background: hovered ? 'rgba(255,255,255,0.05)' : 'transparent' }}
+      style={{ ...styles.tableRow, background: hovered ? 'rgba(255,255,255,0.05)' : 'transparent', cursor: 'pointer' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={() => navigate(`/player/${player.player_id}`)}
     >
       <div style={{ ...styles.td, width: ROSTER_WIDTHS[0], minWidth: ROSTER_WIDTHS[0], display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {player.headshot_url && <img src={player.headshot_url} alt="" style={styles.headshot} onError={e => { e.target.style.display = 'none'; }} />}
-        <span style={{ fontWeight: '600', color: '#fff' }}>{player.player_name}</span>
+        <PlayerAvatar src={player.headshot_url} name={player.player_name} position={player.position} size={26} />
+        <span style={{ fontWeight: '600', color: hovered ? 'var(--pink)' : '#fff', transition: 'color 0.15s' }}>{player.player_name}</span>
       </div>
       <div style={{ ...styles.td, width: ROSTER_WIDTHS[1], minWidth: ROSTER_WIDTHS[1], textAlign: 'center' }}>{player.position}</div>
       <div style={{ ...styles.td, width: ROSTER_WIDTHS[2], minWidth: ROSTER_WIDTHS[2], textAlign: 'center', color: 'rgba(255,255,255,0.80)' }}>{player.team_abbreviation}</div>

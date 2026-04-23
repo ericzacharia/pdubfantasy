@@ -47,7 +47,7 @@ const StandingRow = ({ team, rank, navigate }) => {
       style={{ ...styles.row, background: hovered ? 'rgba(255,255,255,0.05)' : 'transparent', cursor: navigate ? 'pointer' : 'default' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={() => navigate && team.team_id && navigate(`/pwhl/teams/${team.team_id}`)}
+      onClick={() => navigate && team.team_id && navigate(`/teams/${team.team_id}`)}
     >
       <div style={{ ...styles.td, width: COL_WIDTHS[0], minWidth: COL_WIDTHS[0], color: 'rgba(255,255,255,0.65)' }}>{rank}</div>
       <div style={{ ...styles.td, width: COL_WIDTHS[1], minWidth: COL_WIDTHS[1], fontWeight: '600', color: '#fff' }}>{team.team_name}</div>

@@ -106,7 +106,7 @@ const PWHLLogin = () => {
 
         <p style={styles.footerText}>
           Don't have an account?{' '}
-          <Link to="/pwhl/register" style={styles.link}>Create one</Link>
+          <Link to="/register" style={styles.link}>Create one</Link>
         </p>
       </div>
     </div>

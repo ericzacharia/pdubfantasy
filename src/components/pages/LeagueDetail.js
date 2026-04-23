@@ -126,13 +126,13 @@ const LeagueDetail = () => {
             <div style={{ fontWeight: '600', color: '#fff' }}>{myTeam.name}</div>
           </div>
           <div style={styles.myTeamActions}>
-            <button style={styles.actionBtn} onClick={() => navigate(`/pwhl/teams/${myTeam.id}`)}>
+            <button style={styles.actionBtn} onClick={() => navigate(`/teams/${myTeam.id}`)}>
               <i className="fas fa-users" style={{ marginRight: '6px' }} />Roster & Lineup
             </button>
-            <button style={styles.actionBtn} onClick={() => navigate(`/pwhl/waivers/${leagueId}/${myTeam.id}`)}>
+            <button style={styles.actionBtn} onClick={() => navigate(`/waivers/${leagueId}/${myTeam.id}`)}>
               <i className="fas fa-exchange-alt" style={{ marginRight: '6px' }} />Waivers
             </button>
-            <button style={styles.actionBtn} onClick={() => navigate(`/pwhl/trades/${leagueId}/${myTeam.id}`)}>
+            <button style={styles.actionBtn} onClick={() => navigate(`/trades/${leagueId}/${myTeam.id}`)}>
               <i className="fas fa-handshake" style={{ marginRight: '6px' }} />Trades
             </button>
             {league.draft_status === 'completed' && (
@@ -141,7 +141,7 @@ const LeagueDetail = () => {
               </button>
             )}
             {league.draft_status !== 'completed' && (
-              <button style={styles.primaryBtn} onClick={() => navigate(`/pwhl/draft/${leagueId}`)}>
+              <button style={styles.primaryBtn} onClick={() => navigate(`/draft/${leagueId}`)}>
                 <i className="fas fa-random" style={{ marginRight: '6px' }} />
                 {league.draft_status === 'in_progress' ? 'Go to Draft' : 'Draft Room'}
               </button>
@@ -204,7 +204,7 @@ const TeamsTab = ({ teams, navigate, myTeamId }) => (
           ...styles.teamCard,
           borderColor: team.id === myTeamId ? 'rgba(255,124,222,0.3)' : 'rgba(255,255,255,0.1)',
         }}
-        onClick={() => navigate(`/pwhl/teams/${team.id}`)}
+        onClick={() => navigate(`/teams/${team.id}`)}
       >
         <div style={{ fontWeight: '600', color: '#fff', marginBottom: '4px' }}>{team.name}</div>
         <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.65)' }}>
@@ -231,7 +231,7 @@ const DraftTab = ({ league, navigate, leagueId }) => (
       <div style={styles.draftInfo}>
         <i className="fas fa-circle" style={{ fontSize: '1rem', color: '#ff4444', marginBottom: '12px' }} />
         <h4 style={{ color: '#fff', margin: '0 0 8px' }}>Draft In Progress</h4>
-        <button style={styles.primaryBtn} onClick={() => navigate(`/pwhl/draft/${leagueId}`)}>
+        <button style={styles.primaryBtn} onClick={() => navigate(`/draft/${leagueId}`)}>
           <i className="fas fa-random" style={{ marginRight: '6px' }} />Enter Draft Room
         </button>
       </div>
@@ -240,7 +240,7 @@ const DraftTab = ({ league, navigate, leagueId }) => (
       <div style={styles.draftInfo}>
         <i className="fas fa-check-circle" style={{ fontSize: '2rem', color: '#00c853', marginBottom: '12px' }} />
         <h4 style={{ color: '#fff', margin: '0 0 8px' }}>Draft Complete</h4>
-        <button style={styles.secondaryBtn} onClick={() => navigate(`/pwhl/draft/${leagueId}`)}>
+        <button style={styles.secondaryBtn} onClick={() => navigate(`/draft/${leagueId}`)}>
           View Draft Results
         </button>
       </div>

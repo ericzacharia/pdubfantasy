@@ -10,7 +10,7 @@ const PWHLRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register, isPwhlAuthenticated } = usePwhlAuth();
+  const { register, login, isPwhlAuthenticated } = usePwhlAuth();
   const navigate = useNavigate();
 
   if (isPwhlAuthenticated) {
@@ -34,7 +34,9 @@ const PWHLRegister = () => {
     setIsSubmitting(true);
     const result = await register(email, username, password);
     if (result.success) {
-      navigate('/login');
+      // Auto-login after registration
+      const loginResult = await login(email, password);
+      navigate(loginResult.success ? '/' : '/login');
     } else {
       setError(result.error);
     }
@@ -130,7 +132,7 @@ const PWHLRegister = () => {
 
         <p style={styles.footerText}>
           Already have an account?{' '}
-          <Link to="/pwhl/login" style={styles.link}>Sign in</Link>
+          <Link to="/login" style={styles.link}>Sign in</Link>
         </p>
       </div>
     </div>

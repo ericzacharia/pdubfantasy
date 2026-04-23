@@ -83,7 +83,7 @@ const DraftView = () => {
 
   return (
     <div>
-      <button style={styles.backBtn} onClick={() => navigate(`/pwhl/leagues/${leagueId}`)}>
+      <button style={styles.backBtn} onClick={() => navigate(`/leagues/${leagueId}`)}>
         <i className="fas fa-chevron-left" style={{ marginRight: '6px' }} />League
       </button>
 

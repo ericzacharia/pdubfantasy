@@ -89,13 +89,13 @@ const LeagueBrowser = () => {
       {showCreate && <CreateLeagueModal onClose={() => setShowCreate(false)} onCreated={(league) => {
         setMyLeagues(prev => [league, ...prev]);
         setShowCreate(false);
-        navigate(`/pwhl/leagues/${league.id}`);
+        navigate(`/leagues/${league.id}`);
       }} />}
 
       {showJoin && <JoinLeagueModal onClose={() => setShowJoin(false)} onJoined={(league) => {
         setMyLeagues(prev => [league, ...prev]);
         setShowJoin(false);
-        navigate(`/pwhl/leagues/${league.id}`);
+        navigate(`/leagues/${league.id}`);
       }} />}
     </div>
   );
@@ -157,7 +157,7 @@ const LeagueCard = ({ league, navigate, isJoined }) => {
       style={{ ...styles.leagueCard, ...(hovered ? styles.leagueCardHover : {}) }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={() => navigate(`/pwhl/leagues/${league.id}`)}
+      onClick={() => navigate(`/leagues/${league.id}`)}
     >
       <div style={styles.leagueCardTop}>
         <div>

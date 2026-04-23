@@ -20,9 +20,10 @@ const PWHLLayout = () => {
     const path = location.pathname;
     if (path === '/' || path === '/') return 'home';
     if (path.startsWith('/hub')) return 'hub';
-    if (path.startsWith('/leagues') || path.startsWith('/teams') || path.startsWith('/draft') || path.startsWith('/waivers') || path.startsWith('/trades')) return 'leagues';
+    if (path.startsWith('/leagues') || path.startsWith('/teams') || path.startsWith('/draft') || path.startsWith('/waivers') || path.startsWith('/trades') || path.startsWith('/matchup') || path.startsWith('/commissioner') || path.startsWith('/scoring')) return 'leagues';
     if (path.startsWith('/trends')) return 'trends';
     if (path.startsWith('/settings')) return 'settings';
+    if (path.startsWith('/player')) return 'hub';
     if (path.startsWith('/login') || path.startsWith('/register')) return null;
     return 'home';
   };

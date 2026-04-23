@@ -140,10 +140,10 @@ const PWHLHome = () => {
                   </div>
                   <div style={styles.teamActions}>
                     {[
-                      { label: 'My Team', icon: 'fas fa-users', path: `/pwhl/teams/${team.id}` },
-                      { label: 'Waivers', icon: 'fas fa-exchange-alt', path: `/pwhl/waivers/${team.league_id}/${team.id}` },
-                      { label: 'Trades', icon: 'fas fa-handshake', path: `/pwhl/trades/${team.league_id}/${team.id}` },
-                      { label: 'Standings', icon: 'fas fa-list-ol', path: `/pwhl/leagues/${team.league_id}` },
+                      { label: 'My Team', icon: 'fas fa-users', path: `/teams/${team.id}` },
+                      { label: 'Waivers', icon: 'fas fa-exchange-alt', path: `/waivers/${team.league_id}/${team.id}` },
+                      { label: 'Trades', icon: 'fas fa-handshake', path: `/trades/${team.league_id}/${team.id}` },
+                      { label: 'Standings', icon: 'fas fa-list-ol', path: `/leagues/${team.league_id}` },
                     ].map((action) => (
                       <button
                         key={action.label}

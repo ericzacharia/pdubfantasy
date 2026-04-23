@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
 import { pwhlFantasyAPI } from '../../services/pwhlAPI';
+import PlayerAvatar from '../PlayerAvatar';
 
 const DraftView = () => {
   const { leagueId } = useParams();
@@ -215,7 +216,7 @@ const DraftPlayerRow = ({ player, canPick, onPick }) => {
       onMouseLeave={() => setHovered(false)}
     >
       <div style={styles.playerInfo}>
-        {player.headshot_url && <img src={player.headshot_url} alt="" style={styles.headshot} onError={e => { e.target.style.display = 'none'; }} />}
+        <PlayerAvatar src={player.headshot_url} name={player.full_name || `${player.first_name} ${player.last_name}`} position={player.position} size={32} />
         <div>
           <div style={{ fontWeight: '600', color: '#fff', fontSize: '0.875rem' }}>{player.full_name || `${player.first_name} ${player.last_name}`}</div>
           <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.65)' }}>{player.position} · {player.team_abbreviation}</div>

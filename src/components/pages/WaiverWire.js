@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
 import { pwhlFantasyAPI } from '../../services/pwhlAPI';
+import PlayerAvatar from '../PlayerAvatar';
 
 const WaiverWire = () => {
   const { leagueId, teamId } = useParams();
@@ -224,7 +225,7 @@ const WaiverPlayerRow = ({ player, isFaab, onAdd }) => {
       onMouseLeave={() => setHovered(false)}
     >
       <div style={styles.playerInfo}>
-        {player.headshot_url && <img src={player.headshot_url} alt="" style={styles.headshot} onError={e => { e.target.style.display = 'none'; }} />}
+        <PlayerAvatar src={player.headshot_url} name={player.full_name} position={player.position} size={36} />
         <div>
           <div style={{ fontWeight: '600', color: '#fff' }}>{player.full_name}</div>
           <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.65)' }}>

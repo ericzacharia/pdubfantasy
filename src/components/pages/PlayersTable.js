@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import PlayerAvatar from '../PlayerAvatar';
 import { pwhlPlayersAPI } from '../../services/pwhlAPI';
 
 const SKATER_COLS = [
@@ -32,6 +34,7 @@ const POSITIONS = ['All', 'C', 'LW', 'RW', 'D', 'G'];
 const SEASONS = ['2025-2026', '2024-2025', '2024'];
 
 const PlayersTable = () => {
+  const navigate = useNavigate();
   const [playerType, setPlayerType] = useState('skaters'); // 'skaters' | 'goalies'
   const [players, setPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
@@ -253,7 +256,7 @@ const PlayersTable = () => {
               <div style={styles.loadingRow}>No players found</div>
             ) : (
               players.map((player, idx) => (
-                <PlayerRow key={player.id} player={player} cols={cols} getCellValue={getCellValue} idx={idx} />
+                <PlayerRow key={player.id} player={player} cols={cols} getCellValue={getCellValue} idx={idx} navigate={navigate} />
               ))
             )}
           </div>
@@ -286,14 +289,16 @@ const PlayersTable = () => {
   );
 };
 
-const PlayerRow = ({ player, cols, getCellValue, idx }) => {
+const PlayerRow = ({ player, cols, getCellValue, idx, navigate }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <div
       style={{
         ...styles.tableRow,
         background: hovered ? 'rgba(255,255,255,0.05)' : (idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'),
+        cursor: 'pointer',
       }}
+      onClick={() => navigate(`/player/${player.id}`)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -309,15 +314,15 @@ const PlayerRow = ({ player, cols, getCellValue, idx }) => {
             fontWeight: col.key === 'fantasy' ? '700' : col.key === 'name' ? '600' : '400',
           }}
         >
-          {col.key === 'name' && player.headshot_url ? (
+          {col.key === 'name' ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <img
+              <PlayerAvatar
                 src={player.headshot_url}
-                alt=""
-                style={styles.headshot}
-                onError={e => { e.target.style.display = 'none'; }}
+                name={getCellValue(player, 'name')}
+                position={player.position}
+                size={28}
               />
-              <span>{getCellValue(player, 'name')}</span>
+              <span style={{ color: hovered ? 'var(--pink)' : '#fff' }}>{getCellValue(player, 'name')}</span>
             </div>
           ) : (
             getCellValue(player, col.key)

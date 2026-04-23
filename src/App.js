@@ -19,6 +19,7 @@ import TradeCenter from './components/pages/TradeCenter';
 import DraftView from './components/pages/DraftView';
 import TrendsView from './components/pages/TrendsView';
 import PWHLSettings from './components/pages/PWHLSettings';
+import PlayerDetail from './components/pages/PlayerDetail';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
             <Route path="draft/:leagueId" element={<DraftView />} />
             <Route path="trends" element={<TrendsView />} />
             <Route path="settings" element={<PWHLSettings />} />
+            <Route path="player/:playerId" element={<PlayerDetail />} />
           </Route>
         </Routes>
       </Router>

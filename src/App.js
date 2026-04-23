@@ -21,6 +21,7 @@ import TrendsView from './components/pages/TrendsView';
 import PWHLSettings from './components/pages/PWHLSettings';
 import PlayerDetail from './components/pages/PlayerDetail';
 import MatchupView from './components/pages/MatchupView';
+import CommissionerPanel from './components/pages/CommissionerPanel';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
             <Route path="settings" element={<PWHLSettings />} />
             <Route path="player/:playerId" element={<PlayerDetail />} />
             <Route path="matchup/:leagueId" element={<MatchupView />} />
+            <Route path="commissioner/:leagueId" element={<CommissionerPanel />} />
           </Route>
         </Routes>
       </Router>

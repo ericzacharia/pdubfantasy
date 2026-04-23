@@ -110,6 +110,11 @@ const LeagueDetail = () => {
               {copied ? 'Copied!' : league.invite_code}
             </button>
           )}
+          {isCommissioner && (
+            <button style={{ ...styles.inviteBtn, borderColor: 'rgba(255,193,7,0.4)', color: '#ffc107' }} onClick={() => navigate(`/commissioner/${leagueId}`)}>
+              <i className="fas fa-crown" style={{ marginRight: '6px' }} />Commissioner Tools
+            </button>
+          )}
         </div>
       </div>
 

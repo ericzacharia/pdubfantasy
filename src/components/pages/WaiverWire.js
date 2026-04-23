@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
 import { pwhlFantasyAPI } from '../../services/pwhlAPI';
 import PlayerAvatar from '../PlayerAvatar';
+import PlayerStatusBadge from '../PlayerStatusBadge';
 
 const WaiverWire = () => {
   const { leagueId, teamId } = useParams();
@@ -227,7 +228,10 @@ const WaiverPlayerRow = ({ player, isFaab, onAdd }) => {
       <div style={styles.playerInfo}>
         <PlayerAvatar src={player.headshot_url} name={player.full_name} position={player.position} size={36} />
         <div>
-          <div style={{ fontWeight: '600', color: '#fff' }}>{player.full_name}</div>
+          <div style={{ fontWeight: '600', color: '#fff' }}>
+            {player.full_name}
+            <PlayerStatusBadge status={player.status} note={player.status_note} />
+          </div>
           <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.65)' }}>
             {player.position} · {player.team_abbreviation}
           </div>

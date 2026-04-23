@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PlayerAvatar from '../PlayerAvatar';
+import PlayerStatusBadge from '../PlayerStatusBadge';
 import { pwhlPlayersAPI } from '../../services/pwhlAPI';
 
 const STAT_LABELS_SKATER = [
@@ -90,7 +91,10 @@ const PlayerDetail = () => {
           style={{ border: '3px solid rgba(255,124,222,0.4)' }}
         />
         <div style={styles.heroInfo}>
-          <h1 style={styles.playerName}>{player.first_name} {player.last_name}</h1>
+          <h1 style={styles.playerName}>
+            {player.first_name} {player.last_name}
+            <PlayerStatusBadge status={player.status} note={player.status_note} size="md" />
+          </h1>
           <div style={styles.playerMeta}>
             {player.team_logo_url && (
               <img src={player.team_logo_url} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} />

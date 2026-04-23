@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PlayersTable from './PlayersTable';
 import StandingsTable from './StandingsTable';
 import ScheduleView from './ScheduleView';
+import TradeAnalyzer from '../TradeAnalyzer';
 
 const SUB_TABS = [
   { id: 'players',   label: 'Players',   icon: 'fas fa-user' },
@@ -12,6 +13,7 @@ const SUB_TABS = [
 const PWHLHub = () => {
   const [activeTab, setActiveTab] = useState('players');
   const [hoveredTab, setHoveredTab] = useState(null);
+  const [showAnalyzer, setShowAnalyzer] = useState(false);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -45,8 +47,16 @@ const PWHLHub = () => {
             </button>
           );
         })}
+        <button
+          style={{ ...styles.subTabBtn, marginLeft: 'auto', background: 'rgba(255,124,222,0.08)', borderColor: 'rgba(255,124,222,0.2)', color: 'var(--pink)' }}
+          onClick={() => setShowAnalyzer(true)}
+        >
+          <i className="fas fa-balance-scale" style={{ marginRight: '7px', fontSize: '0.85rem' }} />
+          Compare
+        </button>
       </div>
       {renderContent()}
+      {showAnalyzer && <TradeAnalyzer onClose={() => setShowAnalyzer(false)} />}
     </div>
   );
 };

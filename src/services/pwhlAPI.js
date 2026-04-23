@@ -200,6 +200,10 @@ export const pwhlFantasyAPI = {
   vetoTrade: (tradeId) =>
     pwhlApi.post(`/fantasy/trades/${tradeId}/veto`),
 
+  // Scoring breakdown
+  getWeeklyScoring: (teamId, week = null) =>
+    pwhlApi.get(`/fantasy/teams/${teamId}/scoring/week${week ? `?week=${week}` : ''}`),
+
   // Matchups
   getCurrentMatchup: (leagueId) =>
     pwhlApi.get(`/fantasy/leagues/${leagueId}/matchups/current`),

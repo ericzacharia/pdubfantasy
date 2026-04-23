@@ -126,6 +126,12 @@ const MyTeamView = () => {
             onClick={() => setActiveTab(id)}
           >{label}</button>
         ))}
+        <button
+          style={{ ...styles.subTab, marginLeft: 'auto' }}
+          onClick={() => navigate(`/scoring/${teamId}`)}
+        >
+          <i className="fas fa-chart-bar" style={{ marginRight: '6px', fontSize: '0.8rem' }} />Scoring
+        </button>
       </div>
 
       {activeTab === 'roster' && (

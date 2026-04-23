@@ -22,6 +22,7 @@ import PWHLSettings from './components/pages/PWHLSettings';
 import PlayerDetail from './components/pages/PlayerDetail';
 import MatchupView from './components/pages/MatchupView';
 import CommissionerPanel from './components/pages/CommissionerPanel';
+import ScoringBreakdown from './components/pages/ScoringBreakdown';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
             <Route path="player/:playerId" element={<PlayerDetail />} />
             <Route path="matchup/:leagueId" element={<MatchupView />} />
             <Route path="commissioner/:leagueId" element={<CommissionerPanel />} />
+            <Route path="scoring/:teamId" element={<ScoringBreakdown />} />
           </Route>
         </Routes>
       </Router>

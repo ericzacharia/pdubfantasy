@@ -197,6 +197,16 @@ export const pwhlFantasyAPI = {
     pwhlApi.post(`/fantasy/trades/${tradeId}/respond`, { accept }),
   vetoTrade: (tradeId) =>
     pwhlApi.post(`/fantasy/trades/${tradeId}/veto`),
+
+  // Matchups
+  getCurrentMatchup: (leagueId) =>
+    pwhlApi.get(`/fantasy/leagues/${leagueId}/matchups/current`),
+  getMatchupByWeek: (leagueId, week) =>
+    pwhlApi.get(`/fantasy/leagues/${leagueId}/matchups/${week}`),
+  getAllMatchups: (leagueId) =>
+    pwhlApi.get(`/fantasy/leagues/${leagueId}/matchups`),
+  generateSchedule: (leagueId) =>
+    pwhlApi.post(`/fantasy/leagues/${leagueId}/matchups/generate`),
 };
 
 // ── Trends ──

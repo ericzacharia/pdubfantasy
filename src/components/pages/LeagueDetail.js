@@ -130,6 +130,11 @@ const LeagueDetail = () => {
             <button style={styles.actionBtn} onClick={() => navigate(`/pwhl/trades/${leagueId}/${myTeam.id}`)}>
               <i className="fas fa-handshake" style={{ marginRight: '6px' }} />Trades
             </button>
+            {league.draft_status === 'completed' && (
+              <button style={styles.actionBtn} onClick={() => navigate(`/matchup/${leagueId}`)}>
+                <i className="fas fa-hockey-puck" style={{ marginRight: '6px' }} />Matchup
+              </button>
+            )}
             {league.draft_status !== 'completed' && (
               <button style={styles.primaryBtn} onClick={() => navigate(`/pwhl/draft/${leagueId}`)}>
                 <i className="fas fa-random" style={{ marginRight: '6px' }} />

@@ -421,7 +421,7 @@ const PlayerRow = ({ player, cols, getCellValue, idx, navigate, isWatched, onTog
         background: hovered ? 'rgba(255,255,255,0.06)' : (idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)'),
         cursor: 'pointer',
       }}
-      onClick={() => navigate(`/player/${player.id}`)}
+      onClick={() => navigate(`/player/${player.slug || player.id}`)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >

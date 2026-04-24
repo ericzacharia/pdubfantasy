@@ -296,7 +296,7 @@ const RosterRow = ({ player, isSkatersView, idx }) => {
       style={{ ...styles.tableRow, background: hovered ? 'rgba(255,255,255,0.07)' : (idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)'), cursor: 'pointer' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={() => navigate(`/player/${player.player_id}`)}
+      onClick={() => navigate(`/player/${player.player_slug || player.player_id}`)}
     >
       <div style={{ ...styles.td, width: ROSTER_WIDTHS[0], minWidth: ROSTER_WIDTHS[0], display: 'flex', alignItems: 'center', gap: '8px' }}>
         <PlayerAvatar src={player.headshot_url} name={player.player_name} position={player.position} size={26} />

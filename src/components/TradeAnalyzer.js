@@ -168,7 +168,7 @@ const PlayerSearch = ({ label, search, setSearch, results, selected, onSelect, o
           <div>
             <div
               style={{ fontWeight: '700', color: '#fff', cursor: 'pointer' }}
-              onClick={() => navigate(`/player/${selected.id}`)}
+              onClick={() => navigate(`/player/${selected.slug || selected.id}`)}
             >
               {selected.first_name} {selected.last_name}
               <PlayerStatusBadge status={selected.status} note={selected.status_note} />

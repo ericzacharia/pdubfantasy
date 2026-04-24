@@ -94,7 +94,7 @@ const StandingsTable = () => {
             ) : (
               <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 {roster.map((p, i) => (
-                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }} onClick={() => { navigate(`/player/${p.id}`); setRosterTeam(null); }}>
+                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }} onClick={() => { navigate(`/player/${p.slug || p.id}`); setRosterTeam(null); }}>
                     <PlayerAvatar src={p.headshot_url} name={`${p.first_name} ${p.last_name}`} position={p.position} size={32} />
                     <div style={{ flex: 1 }}>
                       <div style={{ color: '#fff', fontWeight: '500', fontSize: '0.9rem' }}>{p.first_name} {p.last_name}</div>

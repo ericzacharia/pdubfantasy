@@ -287,7 +287,9 @@ const PlayerDetail = () => {
                   )}
                   <div style={{ flex: 1 }}>
                     <div style={styles.newsTitle}>{item.title}</div>
-                    <div style={styles.newsDate}>{item.date || new Date(item.published_at).toLocaleDateString()}</div>
+                    <div style={styles.newsDate}>
+                      {new Date(item.published_at || item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
                   </div>
                   <i className="fas fa-external-link-alt" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem', flexShrink: 0 }} />
                 </a>

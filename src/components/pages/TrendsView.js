@@ -42,7 +42,7 @@ const TrendsView = () => {
       const map = {};
       (r.data?.players || []).forEach(p => {
         const name = `${p.first_name} ${p.last_name}`;
-        map[name] = { headshot_url: p.headshot_url, id: p.id, position: p.position };
+        map[name] = { headshot_url: p.headshot_url, id: p.id, slug: p.slug, position: p.position };
       });
       setPlayerData(map);
     }).catch(() => {});
@@ -237,7 +237,7 @@ const TrendCard = ({ trend, teamLogos, playerData, navigate }) => {
           {trend.player && (
             <div
               style={{ ...styles.playerTag, cursor: playerInfo?.id ? 'pointer' : 'default' }}
-              onClick={() => playerInfo?.id && navigate(`/player/${playerInfo.id}`)}
+              onClick={() => playerInfo?.id && navigate(`/player/${playerInfo.slug || playerInfo.id}`)}
               title={playerInfo?.id ? 'View player profile' : trend.player}
             >
               <PlayerAvatar

@@ -96,7 +96,7 @@ const ScoringBreakdown = () => {
                   <div
                     key={player.player_id}
                     style={{ ...styles.tableRow, background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.04)', cursor: 'pointer' }}
-                    onClick={() => navigate(`/player/${player.player_id}`)}
+                    onClick={() => navigate(`/player/${player.player_slug || player.player_id}`)}
                   >
                     <div style={{ ...styles.td, width: '180px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <PlayerAvatar src={player.headshot_url} name={player.player_name} position={player.position} size={26} />
@@ -137,7 +137,7 @@ const ScoringBreakdown = () => {
                   <div
                     key={player.player_id}
                     style={{ ...styles.tableRow, background: 'transparent', opacity: 0.6, cursor: 'pointer' }}
-                    onClick={() => navigate(`/player/${player.player_id}`)}
+                    onClick={() => navigate(`/player/${player.player_slug || player.player_id}`)}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
                       <PlayerAvatar src={player.headshot_url} name={player.player_name} position={player.position} size={24} />

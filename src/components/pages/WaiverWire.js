@@ -227,7 +227,7 @@ const WaiverPlayerRow = ({ player, idx, isFaab, onAdd, navigate }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div style={{ ...styles.playerInfo, cursor: 'pointer' }} onClick={() => navigate(`/player/${player.id}`)}>
+      <div style={{ ...styles.playerInfo, cursor: 'pointer' }} onClick={() => navigate(`/player/${player.slug || player.id}`)}>
         <PlayerAvatar src={player.headshot_url} name={player.full_name} position={player.position} size={36} />
         <div>
           <div style={{ fontWeight: '600', color: hovered ? 'var(--pink)' : '#fff', transition: 'color 0.15s', display: 'flex', alignItems: 'center', gap: '6px' }}>

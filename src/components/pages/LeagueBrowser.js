@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
 import { pwhlFantasyAPI } from '../../services/pwhlAPI';
@@ -20,29 +20,16 @@ const LeagueBrowser = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('my');
   const [myLeagues, setMyLeagues] = useState([]);
-  const [publicLeagues, setPublicLeagues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
 
   useEffect(() => {
     if (!isPwhlAuthenticated) { setLoading(false); return; }
-    const fetchAll = async () => {
-      setLoading(true);
-      try {
-        const [myRes, pubRes] = await Promise.all([
-          pwhlFantasyAPI.getMyLeagues().catch(() => ({ data: [] })),
-          pwhlFantasyAPI.getPublicLeagues().catch(() => ({ data: [] })),
-        ]);
-        setMyLeagues(myRes.data || []);
-        setPublicLeagues(pubRes.data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
+    pwhlFantasyAPI.getMyLeagues()
+      .then(r => setMyLeagues(r.data || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [isPwhlAuthenticated]);
 
   if (!isPwhlAuthenticated) {
@@ -83,7 +70,7 @@ const LeagueBrowser = () => {
       ) : activeTab === 'my' ? (
         <MyLeaguesTab leagues={myLeagues} navigate={navigate} userId={pwhlUser?.id} />
       ) : (
-        <PublicLeaguesTab leagues={publicLeagues} myLeagues={myLeagues} navigate={navigate} userId={pwhlUser?.id} />
+        <PublicLeaguesTab myLeagues={myLeagues} navigate={navigate} userId={pwhlUser?.id} />
       )}
 
       {showCreate && <CreateLeagueModal onClose={() => setShowCreate(false)} onCreated={(league) => {
@@ -116,30 +103,100 @@ const MyLeaguesTab = ({ leagues, navigate, userId }) => {
   );
 };
 
-const PublicLeaguesTab = ({ leagues, myLeagues, navigate, userId }) => {
-  const [search, setSearch] = useState('');
+const PublicLeaguesTab = ({ myLeagues, navigate, userId }) => {
   const myLeagueIds = new Set(myLeagues.map(l => l.id));
-  const filtered = leagues.filter(l => l.name?.toLowerCase().includes(search.toLowerCase()));
+  const [search, setSearch]           = useState('');
+  const [draftStatus, setDraftStatus] = useState('');
+  const [size, setSize]               = useState('');
+  const [draftType, setDraftType]     = useState('');
+  const [page, setPage]               = useState(1);
+  const [data, setData]               = useState({ leagues: [], total: 0, pages: 1 });
+  const [loading, setLoading]         = useState(true);
+  const PAGE_SIZE = 20;
+
+  const fetchLeagues = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = { page, page_size: PAGE_SIZE };
+      if (search)      params.q            = search;
+      if (draftStatus) params.draft_status = draftStatus;
+      if (size)        params.size         = size;
+      if (draftType)   params.draft_type   = draftType;
+      const res = await pwhlFantasyAPI.getPublicLeagues(params);
+      setData(res.data || { leagues: [], total: 0, pages: 1 });
+    } catch { setData({ leagues: [], total: 0, pages: 1 }); }
+    finally { setLoading(false); }
+  }, [search, draftStatus, size, draftType, page]);
+
+  useEffect(() => {
+    const t = setTimeout(fetchLeagues, search ? 350 : 0);
+    return () => clearTimeout(t);
+  }, [fetchLeagues, search]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => { setPage(1); }, [search, draftStatus, size, draftType]);
 
   return (
     <div>
-      <div style={{ position: 'relative', maxWidth: '360px', marginBottom: '16px' }}>
-        <i className="fas fa-search" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.50)', fontSize: '0.85rem' }} />
-        <input
-          type="text"
-          placeholder="Search public leagues..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ ...styles.input, paddingLeft: '36px' }}
-        />
+      {/* Search + filters */}
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px', alignItems: 'center' }}>
+        <div className="pwhl-search-wrap" style={{ flex: '1', minWidth: '200px', maxWidth: '340px' }}>
+          <i className="fas fa-search icon" />
+          <input className="pwhl-input" type="text" placeholder="Search leagues..." value={search}
+            onChange={e => setSearch(e.target.value)} aria-label="Search leagues" />
+        </div>
+
+        <select value={draftStatus} onChange={e => setDraftStatus(e.target.value)} style={styles.filterSelect} aria-label="Filter by status">
+          <option value="">All Status</option>
+          <option value="pending">Setup</option>
+          <option value="in_progress">Drafting</option>
+          <option value="completed">Active</option>
+        </select>
+
+        <select value={size} onChange={e => setSize(e.target.value)} style={styles.filterSelect} aria-label="Filter by team count">
+          <option value="">Any Size</option>
+          {[6, 8, 10, 12, 16].map(n => <option key={n} value={n}>{n} Teams</option>)}
+        </select>
+
+        <select value={draftType} onChange={e => setDraftType(e.target.value)} style={styles.filterSelect} aria-label="Filter by draft type">
+          <option value="">Any Draft</option>
+          <option value="snake">Snake</option>
+          <option value="auction">Auction</option>
+        </select>
+
+        <span style={{ marginLeft: 'auto', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
+          {loading ? '…' : `${data.total.toLocaleString()} leagues`}
+        </span>
       </div>
-      {filtered.length === 0 ? (
-        <div style={styles.emptyState}><p style={{ color: 'rgba(255,255,255,0.80)' }}>No public leagues found.</p></div>
+
+      {/* Results */}
+      {loading ? (
+        <div style={styles.loading}><i className="fas fa-spinner fa-spin" style={{ marginRight: '8px' }} />Loading leagues...</div>
+      ) : data.leagues.length === 0 ? (
+        <div style={styles.emptyState}><p style={{ color: 'rgba(255,255,255,0.70)' }}>No leagues match your filters.</p></div>
       ) : (
         <div style={styles.leaguesGrid}>
-          {filtered.map(league => (
-            <LeagueCard key={league.id} league={league} navigate={navigate} isJoined={myLeagueIds.has(league.id)} userId={userId} />
+          {data.leagues.map(league => (
+            <LeagueCard key={league.id} league={league} navigate={navigate}
+              isJoined={myLeagueIds.has(league.id)} userId={userId} />
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {data.pages > 1 && (
+        <div style={styles.pagination}>
+          <button className="pwhl-btn pwhl-btn-ghost" style={{ padding: '6px 14px' }}
+            disabled={page <= 1} onClick={() => setPage(p => p - 1)} aria-label="Previous page">
+            <i className="fas fa-chevron-left" />
+          </button>
+          <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem' }}>
+            Page {page} of {data.pages}
+          </span>
+          <button className="pwhl-btn pwhl-btn-ghost" style={{ padding: '6px 14px' }}
+            disabled={page >= data.pages} onClick={() => setPage(p => p + 1)} aria-label="Next page">
+            <i className="fas fa-chevron-right" />
+          </button>
         </div>
       )}
     </div>
@@ -330,6 +387,8 @@ const styles = {
   primaryBtn: { background: 'linear-gradient(135deg, var(--pink), var(--violet))', color: '#fff', border: 'none', padding: '9px 18px', borderRadius: '8px', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center' },
   secondaryBtn: { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.15)', padding: '9px 18px', borderRadius: '8px', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center' },
   loading: { textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.65)' },
+  filterSelect: { background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#fff', padding: '8px 12px', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'Manrope, sans-serif' },
+  pagination: { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '20px' },
   emptyState: { textAlign: 'center', padding: '2.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' },
   leaguesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' },
   leagueCard: { background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', padding: '20px', cursor: 'pointer', transition: 'all 0.2s ease' },

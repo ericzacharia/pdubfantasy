@@ -131,8 +131,8 @@ export const pwhlFantasyAPI = {
   // Leagues
   getMyLeagues: () =>
     pwhlApi.get('/leagues'),
-  getPublicLeagues: () =>
-    pwhlApi.get('/leagues/public'),
+  getPublicLeagues: (params = {}) =>
+    pwhlApi.get('/leagues/public', { params }),
   getLeague: (id) =>
     pwhlApi.get(`/leagues/${id}`),
   createLeague: (data) =>

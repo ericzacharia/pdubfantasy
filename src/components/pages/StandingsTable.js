@@ -159,7 +159,7 @@ const StandingsTable = () => {
                   idx={idx}
                   cols={COLS}
                   getCellValue={getCellValue}
-                  onRosterClick={() => openRoster(team)}
+                  onRosterClick={() => navigate(`/team/${team.abbreviation}`)}
                 />
               ))
             )}

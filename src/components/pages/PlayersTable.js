@@ -453,7 +453,11 @@ const PlayerRow = ({ player, cols, getCellValue, idx, navigate, isWatched, onTog
                   </span>
                   <PosBadge pos={player.position} />
                 </div>
-                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{player.team_abbreviation}</div>
+                <div
+                  style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginTop: '1px', cursor: 'pointer' }}
+                  onClick={e => { e.stopPropagation(); navigate(`/team/${player.team_abbreviation}`); }}
+                  title={`View ${player.team_abbreviation} team page`}
+                >{player.team_abbreviation}</div>
               </div>
               {/* Watchlist star — visible on hover or when active */}
               {(hovered || isWatched) && (

@@ -222,7 +222,7 @@ const TrendCard = ({ trend, idx, teamLogos, playerData, navigate }) => {
           {trend.team && (
             <div
               style={{ ...styles.teamTag, cursor: 'pointer' }}
-              onClick={() => navigate(`/hub?team=${encodeURIComponent(trend.team)}`)}
+              onClick={() => navigate(`/team/${trend.team}`)}
               title={`View ${trend.team} players`}
             >
               {teamLogo ? (

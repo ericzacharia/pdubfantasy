@@ -117,13 +117,14 @@ const PlayersTable = () => {
       };
       if (search) params.q = search;
 
+      // Always send position to backend so pagination counts are exact
       if (playerType === 'goalies') {
         params.position = 'G';
       } else if (selectedPosition !== 'All') {
         params.position = selectedPosition;
       } else {
-        // exclude goalies from skater view
-        // backend filters by position; no param = all, so we fetch all and note it
+        // All skaters: exclude goalies via comma-separated list
+        params.position = 'F,LW,RW,C,D';
       }
       if (selectedTeam !== 'All') {
         const team = teams.find(t => t.abbreviation === selectedTeam);
@@ -133,14 +134,7 @@ const PlayersTable = () => {
       const res = await pwhlPlayersAPI.getPlayers(params);
       let data = res.data?.players || [];
 
-      // Client-side filter goalies/skaters if backend doesn't support multi-exclude
-      if (playerType === 'skaters') {
-        data = data.filter(p => p.position !== 'G');
-      } else {
-        data = data.filter(p => p.position === 'G');
-      }
-
-      // Sort client-side by direction
+      // Sort client-side by direction (asc = reverse the DESC result from backend)
       if (sortDir === 'asc') data = [...data].reverse();
 
       setPlayers(data);

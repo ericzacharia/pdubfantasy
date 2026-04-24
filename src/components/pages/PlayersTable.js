@@ -493,18 +493,16 @@ const PlayerRow = ({ player, cols, getCellValue, idx, rank, teamLogoMap, navigat
                   <PosBadge pos={player.position} />
                 </div>
               </div>
-              {/* Watchlist star — visible on hover or when active */}
-              {(hovered || isWatched) && (
-                <button
-                  className={`pwhl-star ${isWatched ? 'active' : ''}`}
-                  onClick={onToggleWatch}
-                  aria-label={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
-                  title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
-                >
-                  <i className={isWatched ? 'fas fa-star' : 'far fa-star'} />
-                </button>
-              )}
-              {hovered && !isWatched && <i className="fas fa-chevron-right" style={{ fontSize: '0.65rem', color: 'var(--text-faint)', flexShrink: 0 }} />}
+              {/* Watchlist star — always visible; hover effects handled by .pwhl-star CSS */}
+              <button
+                className={`pwhl-star ${isWatched ? 'active' : ''}`}
+                onClick={onToggleWatch}
+                aria-label={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
+                title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
+              >
+                <i className={isWatched ? 'fas fa-star' : 'far fa-star'} />
+              </button>
+              {hovered && <i className="fas fa-chevron-right" style={{ fontSize: '0.65rem', color: 'var(--text-faint)', flexShrink: 0 }} />}
             </div>
           ) : col.key === 'rank' ? (
             <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', fontWeight: '500' }}>{rank}</span>

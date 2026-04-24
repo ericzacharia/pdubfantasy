@@ -130,9 +130,12 @@ select option {
 .pwhl-back-btn:hover { color: var(--text-secondary); }
 
 /* ── Star/watchlist ───────────────────────────────────────── */
-.pwhl-star { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.25); font-size: 0.85rem; padding: 2px 5px; transition: color 0.2s, transform 0.15s; line-height: 1; }
-.pwhl-star:hover { color: var(--yellow); transform: scale(1.2); }
+.pwhl-star { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.2); font-size: 0.85rem; padding: 2px 5px; transition: color 0.2s, transform 0.15s; line-height: 1; }
+.pwhl-star:hover { color: var(--yellow); transform: scale(1.25); }
 .pwhl-star.active { color: var(--yellow); }
+/* Empty star gets a warmer tint on row hover so it's obvious it's clickable */
+tr:hover .pwhl-star:not(.active),
+div:hover > .pwhl-star:not(.active) { color: rgba(255,193,7,0.45); }
 
 /* ── Gradient text ────────────────────────────────────────── */
 .pwhl-gradient-text {

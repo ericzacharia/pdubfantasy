@@ -6,7 +6,7 @@ import { pwhlLeagueAPI, pwhlPlayersAPI } from '../../services/pwhlAPI';
 
 const STAT_COLS = [
   { key: 'gp',  label: 'GP' },
-  { key: 'w',   label: 'W (3 pts)',   color: '#00c853' },
+  { key: 'w',   label: 'W (3 pts)',   color: '#60a5fa' },
   { key: 'otw', label: 'OTW (2 pts)', color: '#69db7c' },
   { key: 'otl', label: 'OTL (1 pt)',  color: '#ffc107' },
   { key: 'l',   label: 'L (0 pts)',   color: '#ff5252' },

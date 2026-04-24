@@ -18,9 +18,8 @@ const PosBadge = ({ pos }) => {
 
 // name col fixed, stat cols flex so they expand to fill available space
 const SKATER_COLS = [
-  { key: 'rank',        label: 'Rank',    sortKey: null,             width: '42px', flex: false },
+  { key: 'rank',        label: 'RK',      sortKey: null,             width: '34px', flex: false },
   { key: 'name',        label: 'Player',  sortKey: 'name',          width: '220px', flex: false },
-  { key: 'jersey',      label: 'No.',     sortKey: 'jersey_number',  width: '42px', flex: false },
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   flex: true },
   { key: 'goals',       label: 'G',       sortKey: 'goals',          flex: true },
   { key: 'assists',     label: 'A',       sortKey: 'assists',        flex: true },
@@ -32,9 +31,8 @@ const SKATER_COLS = [
 ];
 
 const GOALIE_COLS = [
-  { key: 'rank',        label: 'Rank',    sortKey: null,             width: '42px', flex: false },
+  { key: 'rank',        label: 'RK',      sortKey: null,             width: '34px', flex: false },
   { key: 'name',        label: 'Player',  sortKey: 'name',          width: '220px', flex: false },
-  { key: 'jersey',      label: 'No.',     sortKey: 'jersey_number',  width: '42px', flex: false },
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   flex: true },
   { key: 'wins',        label: 'W',       sortKey: 'wins',           flex: true },
   { key: 'losses',      label: 'L',       sortKey: 'losses',         flex: true },
@@ -491,6 +489,11 @@ const PlayerRow = ({ player, cols, getCellValue, idx, rank, teamLogoMap, navigat
                     )}
                   </div>
                   <PosBadge pos={player.position} />
+                  {player.jersey_number && (
+                    <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', fontWeight: '500' }}>
+                      #{player.jersey_number}
+                    </span>
+                  )}
                 </div>
               </div>
               {/* Watchlist star — always visible; hover effects handled by .pwhl-star CSS */}

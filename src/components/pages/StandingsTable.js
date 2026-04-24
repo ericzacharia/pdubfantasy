@@ -114,8 +114,8 @@ const StandingsTable = () => {
         {[
           { key: 'W',   label: 'Regulation Win',   pts: 3,  color: '#00c853' },
           { key: 'OTW', label: 'Overtime/SO Win',  pts: 2,  color: '#69db7c' },
-          { key: 'OTL', label: 'Overtime/SO Loss', pts: 1,  color: '#ffc107' },
-          { key: 'L',   label: 'Regulation Loss',  pts: 0,  color: '#ff5252' },
+          { key: 'OTL', label: 'Overtime/SO Loss',  pts: 1,  color: '#ffc107' },
+          { key: 'L',   label: 'Regulation Loss',   pts: 0,  color: '#ff5252' },
         ].map(({ key, label, pts, color }) => (
           <div key={key} style={styles.legendItem} title={label}>
             <span style={{ ...styles.legendKey, color }}>{key}</span>

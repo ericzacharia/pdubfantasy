@@ -8,32 +8,35 @@ const STAT_COLS = [
   { key: 'gp',  label: 'GP' },
   { key: 'w',   label: 'W (3 pts)',   color: '#00c853' },
   { key: 'otw', label: 'OTW (2 pts)', color: '#69db7c' },
-  { key: 'l',   label: 'L',   color: '#ff5252' },
-  { key: 'otl', label: 'OTL', color: '#ffc107' },
+  { key: 'otl', label: 'OTL (1 pt)',  color: '#ffc107' },
+  { key: 'l',   label: 'L (0 pts)',   color: '#ff5252' },
   { key: 'pts', label: 'PTS', color: 'var(--pink)', bold: true },
   { key: 'gf',  label: 'GF' },
   { key: 'ga',  label: 'GA' },
 ];
 
+// flex:true columns expand to fill available width; fixed columns stay fixed
 const SKATER_COLS = [
-  { key: 'name',     label: 'Player',  width: '200px' },
-  { key: 'position', label: 'POS',     width: '55px' },
-  { key: 'gp',       label: 'GP',      width: '48px' },
-  { key: 'goals',    label: 'G',       width: '44px' },
-  { key: 'assists',  label: 'A',       width: '44px' },
-  { key: 'points',   label: 'PTS',     width: '48px' },
-  { key: 'shots',    label: 'SOG',     width: '48px' },
-  { key: 'fantasy',  label: 'FP',      width: '56px', highlight: true },
+  { key: 'name',     label: 'Player', width: '200px', flex: false },
+  { key: 'jersey',   label: '#',      flex: true },
+  { key: 'position', label: 'POS',    flex: true },
+  { key: 'gp',       label: 'GP',     flex: true },
+  { key: 'goals',    label: 'G',      flex: true },
+  { key: 'assists',  label: 'A',      flex: true },
+  { key: 'points',   label: 'PTS',    flex: true },
+  { key: 'shots',    label: 'SOG',    flex: true },
+  { key: 'fantasy',  label: 'FP',     flex: true, highlight: true },
 ];
 
 const GOALIE_COLS = [
-  { key: 'name',       label: 'Player', width: '200px' },
-  { key: 'gp',         label: 'GP',     width: '48px' },
-  { key: 'wins',       label: 'W',      width: '44px' },
-  { key: 'save_pct',   label: 'SV%',    width: '64px' },
-  { key: 'gaa',        label: 'GAA',    width: '60px' },
-  { key: 'shutouts',   label: 'SO',     width: '48px' },
-  { key: 'fantasy',    label: 'FP',     width: '56px', highlight: true },
+  { key: 'name',     label: 'Player', width: '200px', flex: false },
+  { key: 'jersey',   label: '#',      flex: true },
+  { key: 'gp',       label: 'GP',     flex: true },
+  { key: 'wins',     label: 'W',      flex: true },
+  { key: 'save_pct', label: 'SV%',    flex: true },
+  { key: 'gaa',      label: 'GAA',    flex: true },
+  { key: 'shutouts', label: 'SO',     flex: true },
+  { key: 'fantasy',  label: 'FP',     flex: true, highlight: true },
 ];
 
 const TeamDetail = () => {
@@ -106,6 +109,7 @@ const TeamDetail = () => {
     const stats = player.season_stats || {};
     switch (key) {
       case 'name':     return null; // rendered specially
+      case 'jersey':   return player.jersey_number ? `#${player.jersey_number}` : '—';
       case 'position': return player.position;
       case 'gp':       return stats.games_played ?? 0;
       case 'goals':    return stats.goals ?? 0;
@@ -196,7 +200,7 @@ const TeamDetail = () => {
                   {cols.map((col, i) => (
                     <div key={col.key} style={{
                       ...s.th,
-                      ...(col.width ? { width: col.width, minWidth: col.width } : { flex: 1 }),
+                      ...(col.flex ? { flex: 1, minWidth: '44px' } : { width: col.width, minWidth: col.width }),
                       textAlign: i === 0 ? 'left' : 'center',
                       color: col.highlight ? 'var(--pink)' : 'rgba(255,255,255,0.7)',
                     }}>{col.label}</div>
@@ -215,7 +219,7 @@ const TeamDetail = () => {
                     {cols.map((col, i) => (
                       <div key={col.key} style={{
                         ...s.td,
-                        ...(col.width ? { width: col.width, minWidth: col.width } : { flex: 1 }),
+                        ...(col.flex ? { flex: 1, minWidth: '44px' } : { width: col.width, minWidth: col.width }),
                         textAlign: i === 0 ? 'left' : 'center',
                         color: col.highlight ? 'var(--pink)' : '#fff',
                         fontWeight: col.highlight ? '700' : i === 0 ? '600' : '400',

@@ -387,7 +387,7 @@ const styles = {
   primaryBtn: { background: 'linear-gradient(135deg, var(--pink), var(--violet))', color: '#fff', border: 'none', padding: '9px 18px', borderRadius: '8px', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center' },
   secondaryBtn: { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.15)', padding: '9px 18px', borderRadius: '8px', fontSize: '0.875rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center' },
   loading: { textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.65)' },
-  filterSelect: { background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#fff', padding: '8px 12px', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'Manrope, sans-serif' },
+  filterSelect: { background: '#1e0a3c', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', color: '#fff', padding: '8px 12px', fontSize: '0.875rem', cursor: 'pointer', fontFamily: 'Manrope, sans-serif' },
   pagination: { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '20px' },
   emptyState: { textAlign: 'center', padding: '2.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' },
   leaguesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' },

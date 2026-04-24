@@ -33,7 +33,7 @@ const TradeAnalyzer = ({ onClose }) => {
   const [player2, setPlayer2] = useState(null);
 
   const searchPlayers = async (q, setResults) => {
-    if (!q || q.length < 2) { setResults([]); return; }
+    if (!q || q.length < 1) { setResults([]); return; }
     try {
       const res = await pwhlPlayersAPI.getPlayers({ q, page_size: 8, season: '2025-2026' });
       setResults(res.data?.players || []);
@@ -86,7 +86,7 @@ const TradeAnalyzer = ({ onClose }) => {
         <div style={styles.modalHeader}>
           <h3 style={styles.modalTitle}>
             <i className="fas fa-balance-scale" style={{ marginRight: '8px', color: 'var(--pink)' }} />
-            Trade Analyzer
+            Compare Players
           </h3>
           <button onClick={onClose} style={styles.closeBtn}><i className="fas fa-times" /></button>
         </div>
@@ -216,7 +216,7 @@ const PlayerSearch = ({ label, search, setSearch, results, selected, onSelect, o
 
 const styles = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' },
-  modal: { background: '#1a0a2e', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto' },
+  modal: { background: '#1a0a2e', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '780px', minHeight: '60vh', maxHeight: '92vh', overflowY: 'auto' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' },
   modalTitle: { margin: 0, color: '#fff', fontSize: '1.1rem', display: 'flex', alignItems: 'center' },
   closeBtn: { background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '1rem' },

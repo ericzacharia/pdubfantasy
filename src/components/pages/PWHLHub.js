@@ -55,7 +55,7 @@ const PWHLHub = () => {
           onClick={() => setShowAnalyzer(true)}
         >
           <i className="fas fa-balance-scale" style={{ marginRight: '7px', fontSize: '0.85rem' }} />
-          Compare
+          Compare Players
         </button>
       </div>
       {renderContent()}

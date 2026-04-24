@@ -51,10 +51,10 @@ const TeamDetail = () => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [teamsRes, standingsRes, gamesRes] = await Promise.all([
+        // First get teams + standings in parallel
+        const [teamsRes, standingsRes] = await Promise.all([
           pwhlPlayersAPI.getAllTeams(),
           pwhlLeagueAPI.getStandings({ season: '2025-2026' }),
-          pwhlLeagueAPI.getGames({ limit: 30 }).catch(() => ({ data: [] })),
         ]);
 
         const allTeams = teamsRes.data || [];
@@ -62,19 +62,24 @@ const TeamDetail = () => {
         if (!found) { setLoading(false); return; }
         setTeam(found);
 
-        // Find standings row for this team
         const standingRow = (standingsRes.data || []).find(s => s.id === found.id);
         setStandings(standingRow || null);
 
-        // Get team roster
-        const rosterRes = await pwhlLeagueAPI.getTeamRoster(found.id);
+        // Fetch roster + full season games for this team in parallel
+        const [rosterRes, gamesRes] = await Promise.all([
+          pwhlLeagueAPI.getTeamRoster(found.id),
+          pwhlLeagueAPI.getGames({
+            team_id: found.id,
+            limit: 100,
+            from_date: '2025-10-01',
+          }).catch(() => ({ data: [] })),
+        ]);
+
         setRoster(rosterRes.data || []);
 
-        // Filter games for this team
-        const teamGames = (gamesRes.data || []).filter(g =>
-          g.home_team === found.abbreviation || g.away_team === found.abbreviation
-        ).sort((a, b) => new Date(b.game_time || b.game_date) - new Date(a.game_time || a.game_date));
-        setGames(teamGames.slice(0, 10));
+        const teamGames = (gamesRes.data || [])
+          .sort((a, b) => new Date(b.game_time || b.game_date) - new Date(a.game_time || a.game_date));
+        setGames(teamGames);
       } catch (err) {
         console.error(err);
       } finally {
@@ -163,7 +168,7 @@ const TeamDetail = () => {
 
       {/* Tabs */}
       <div style={s.tabs}>
-        {[['roster', `Roster (${roster.length})`], ['schedule', `Games (${games.length})`]].map(([id, label]) => (
+        {[['roster', `Roster (${roster.length})`], ['schedule', `Games (${games.length})${games.length === 100 ? '+' : ''}`]].map(([id, label]) => (
           <button
             key={id}
             style={{ ...s.tab, ...(activeTab === id ? { ...s.tabActive, borderBottomColor: primaryColor, color: primaryColor } : {}) }}
@@ -198,7 +203,10 @@ const TeamDetail = () => {
                   ))}
                 </div>
                 {displayRoster.length === 0 ? (
-                  <div style={s.empty}>No players found</div>
+                  <div style={s.empty}>
+                    No {rosterTab} found for this team
+                    {rosterTab === 'goalies' && ' — goalie data may not yet be in the database'}
+                  </div>
                 ) : displayRoster.map((player, idx) => (
                   <div key={player.id}
                     style={{ ...s.tableRow, background: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)', cursor: 'pointer' }}

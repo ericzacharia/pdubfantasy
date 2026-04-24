@@ -181,6 +181,8 @@ export const pwhlFantasyAPI = {
     pwhlApi.post(`/leagues/${leagueId}/draft/cpu-picks-until-mine?sigma=${sigma}`),
   cpuComplete: (leagueId, sigma = 8) =>
     pwhlApi.post(`/leagues/${leagueId}/draft/cpu-complete?sigma=${sigma}`),
+  cpuPickForMe: (leagueId, sigma = 4) =>
+    pwhlApi.post(`/leagues/${leagueId}/draft/cpu-pick-for-me?sigma=${sigma}`),
   makeDraftPick: (leagueId, player_id) =>
     pwhlApi.post(`/leagues/${leagueId}/draft/pick`, { player_id }),
   getAvailablePlayers: (leagueId, params = {}) =>

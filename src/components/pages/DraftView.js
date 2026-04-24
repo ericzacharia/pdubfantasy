@@ -71,7 +71,7 @@ const DraftView = () => {
 
   const showMsg = (type, text) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3500);
+    setTimeout(() => setMessage(null), 5000);
   };
 
   const runCpuPick = async () => {
@@ -99,12 +99,37 @@ const DraftView = () => {
     try {
       const res = await pwhlFantasyAPI.cpuPicksUntilMine(leagueId, sigma);
       const d = res.data;
+      if (d.already_your_turn) {
+        showMsg('info', d.message);
+      } else {
+        if (d.picks?.length) {
+          setSimLog(prev => [...d.picks.map(p => `Pick #${p.pick_number}: ${p.team_name} → ${p.player_name}`), ...prev].slice(0, 30));
+        }
+        if (d.your_turn) showMsg('success', `${d.message} ${d.picks?.length} CPU picks made.`);
+        if (d.done) showMsg('success', 'Draft complete!');
+        await fetchDraft();
+      }
+    } catch (err) {
+      showMsg('error', err.response?.data?.detail || 'Simulation error');
+    } finally {
+      setSimulating(false);
+    }
+  };
+
+  const runPickForMe = async () => {
+    setSimulating(true);
+    try {
+      const res = await pwhlFantasyAPI.cpuPickForMe(leagueId, sigma);
+      const d = res.data;
       if (d.picks?.length) {
-        setSimLog(prev => [...d.picks.map(p => `Pick #${p.pick_number}: ${p.team_name} → ${p.player_name}`), ...prev].slice(0, 30));
+        setSimLog(prev => [
+          ...d.picks.map(p => `${p.was_mine ? '★' : ' '} Pick #${p.pick_number}: ${p.team_name} → ${p.player_name}`),
+          ...prev
+        ].slice(0, 30));
       }
       await fetchDraft();
-      if (d.your_turn) showMsg('success', `Your turn! ${d.picks?.length || 0} CPU picks made.`);
-      if (d.done) showMsg('success', "Draft complete!");
+      if (d.your_turn) showMsg('success', `Your turn again (pick #${d.pick_number})!`);
+      if (d.done) showMsg('success', 'Draft complete!');
     } catch (err) {
       showMsg('error', err.response?.data?.detail || 'Simulation error');
     } finally {
@@ -181,7 +206,12 @@ const DraftView = () => {
       </div>
 
       {message && (
-        <div style={{ ...styles.msgBanner, background: message.type === 'success' ? 'rgba(0,200,83,0.12)' : 'rgba(255,82,82,0.12)', borderColor: message.type === 'success' ? 'rgba(0,200,83,0.3)' : 'rgba(255,82,82,0.3)', color: message.type === 'success' ? '#00c853' : '#ff5252' }}>
+        <div style={{
+          ...styles.msgBanner,
+          background: message.type === 'success' ? 'rgba(0,200,83,0.12)' : message.type === 'info' ? 'rgba(255,193,7,0.12)' : 'rgba(255,82,82,0.12)',
+          borderColor: message.type === 'success' ? 'rgba(0,200,83,0.3)' : message.type === 'info' ? 'rgba(255,193,7,0.3)' : 'rgba(255,82,82,0.3)',
+          color: message.type === 'success' ? '#00c853' : message.type === 'info' ? '#ffc107' : '#ff5252',
+        }}>
           {message.text}
         </div>
       )}
@@ -208,12 +238,20 @@ const DraftView = () => {
             <button style={{ ...simStyles.btn, opacity: simulating ? 0.5 : 1 }} disabled={simulating || isMyTurn} onClick={runCpuPick}>
               <i className="fas fa-step-forward" style={{ marginRight: '6px' }} />One CPU Pick
             </button>
-            <button style={{ ...simStyles.btn, background: 'rgba(255,193,7,0.2)', borderColor: 'rgba(255,193,7,0.4)', color: '#ffc107', opacity: simulating ? 0.5 : 1 }} disabled={simulating} onClick={runUntilMyTurn}>
+            <button style={{ ...simStyles.btn, background: 'rgba(255,193,7,0.2)', borderColor: 'rgba(255,193,7,0.4)', color: '#ffc107', opacity: simulating ? 0.5 : 1 }} disabled={simulating || isMyTurn} onClick={runUntilMyTurn}>
               <i className="fas fa-fast-forward" style={{ marginRight: '6px' }} />CPU Until My Turn
             </button>
-            <button style={{ ...simStyles.btn, background: 'rgba(255,82,82,0.15)', borderColor: 'rgba(255,82,82,0.3)', color: '#ff5252', opacity: simulating ? 0.5 : 1 }} disabled={simulating} onClick={runComplete}>
-              <i className="fas fa-flag-checkered" style={{ marginRight: '6px' }} />Auto-Complete Draft
+            <button style={{ ...simStyles.btn, background: 'rgba(255,124,222,0.2)', borderColor: 'rgba(255,124,222,0.4)', color: 'var(--pink)', opacity: simulating ? 0.5 : 1 }} disabled={simulating || !isMyTurn} onClick={runPickForMe}>
+              <i className="fas fa-magic" style={{ marginRight: '6px' }} />Auto-pick for me + CPU
             </button>
+            <button style={{ ...simStyles.btn, background: 'rgba(255,82,82,0.15)', borderColor: 'rgba(255,82,82,0.3)', color: '#ff5252', opacity: simulating ? 0.5 : 1 }} disabled={simulating} onClick={runComplete}>
+              <i className="fas fa-flag-checkered" style={{ marginRight: '6px' }} />Auto-Complete All
+            </button>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', marginTop: '6px' }}>
+            {isMyTurn
+              ? '✦ Your turn — use "Auto-pick for me + CPU" or pick manually from the list below'
+              : '✦ CPU Until My Turn and One CPU Pick are active when it\'s another team\'s turn'}
           </div>
           {simLog.length > 0 && (
             <div style={simStyles.log}>

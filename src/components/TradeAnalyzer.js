@@ -216,7 +216,7 @@ const PlayerSearch = ({ label, search, setSearch, results, selected, onSelect, o
 
 const styles = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' },
-  modal: { background: '#1a0a2e', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '780px', minHeight: '60vh', maxHeight: '92vh', overflowY: 'auto' },
+  modal: { background: '#1a0a2e', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '780px', minHeight: '60vh', maxHeight: '92vh', overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.12) rgba(255,255,255,0.03)' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' },
   modalTitle: { margin: 0, color: '#fff', fontSize: '1.1rem', display: 'flex', alignItems: 'center' },
   closeBtn: { background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '1rem' },

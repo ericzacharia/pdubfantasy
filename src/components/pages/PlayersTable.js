@@ -36,6 +36,7 @@ const GOALIE_COLS = [
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   flex: true },
   { key: 'wins',        label: 'W',       sortKey: 'wins',           flex: true },
   { key: 'losses',      label: 'L',       sortKey: 'losses',         flex: true },
+  { key: 'saves',       label: 'SV',      sortKey: 'saves',          flex: true },
   { key: 'save_pct',    label: 'SV%',     sortKey: 'save_pct',       flex: true },
   { key: 'gaa',         label: 'GAA',     sortKey: 'gaa',            flex: true },
   { key: 'shutouts',    label: 'SO',      sortKey: 'shutouts',       flex: true },
@@ -181,6 +182,7 @@ const PlayersTable = () => {
       case 'pim':        return stats.penalty_minutes ?? 0;
       case 'wins':       return stats.wins ?? 0;
       case 'losses':     return stats.losses ?? 0;
+      case 'saves':      return stats.saves ?? 0;
       case 'save_pct':   return stats.save_percentage != null ? stats.save_percentage.toFixed(3) : '—';
       case 'gaa':        return stats.goals_against_average != null ? stats.goals_against_average.toFixed(2) : '—';
       case 'shutouts':   return stats.shutouts ?? 0;

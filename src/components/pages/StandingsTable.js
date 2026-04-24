@@ -109,6 +109,22 @@ const StandingsTable = () => {
         </div>
       )}
 
+      {/* Points legend */}
+      <div style={styles.legend}>
+        {[
+          { key: 'W',   label: 'Win',              pts: 2,  color: '#00c853' },
+          { key: 'OTW', label: 'Overtime/SO Win',  pts: 2,  color: '#69db7c' },
+          { key: 'OTL', label: 'Overtime/SO Loss', pts: 1,  color: '#ffc107' },
+          { key: 'L',   label: 'Regulation Loss',  pts: 0,  color: '#ff5252' },
+        ].map(({ key, label, pts, color }) => (
+          <div key={key} style={styles.legendItem} title={label}>
+            <span style={{ ...styles.legendKey, color }}>{key}</span>
+            <span style={styles.legendPts}>{pts} pt{pts !== 1 ? 's' : ''}</span>
+          </div>
+        ))}
+        <span style={styles.legendNote}>· PTS = total standings points</span>
+      </div>
+
       <div style={styles.tableCard}>
         <div className="pwhl-table-scroll">
           <div style={{ minWidth: '590px' }}>
@@ -257,6 +273,32 @@ const styles = {
     textAlign: 'center',
     color: 'rgba(255,255,255,0.65)',
     fontSize: '0.9rem',
+  },
+  legend: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    padding: '8px 4px',
+    marginBottom: '8px',
+    flexWrap: 'wrap',
+  },
+  legendItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    fontSize: '0.78rem',
+  },
+  legendKey: {
+    fontWeight: '700',
+    minWidth: '28px',
+  },
+  legendPts: {
+    color: 'rgba(255,255,255,0.4)',
+  },
+  legendNote: {
+    fontSize: '0.75rem',
+    color: 'rgba(255,255,255,0.3)',
+    marginLeft: 'auto',
   },
 };
 

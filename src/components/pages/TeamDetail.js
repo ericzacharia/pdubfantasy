@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import PlayerAvatar from '../PlayerAvatar';
-import PosBadge from '../PosBadge';
+import PlayerStatsTable from '../PlayerStatsTable';
 import { pwhlLeagueAPI, pwhlPlayersAPI } from '../../services/pwhlAPI';
 
 const STAT_COLS = [
@@ -46,6 +45,7 @@ const TeamDetail = () => {
   const [standings, setStandings] = useState(null);
   const [roster, setRoster] = useState([]);
   const [games, setGames] = useState([]);
+  const [allTeams, setAllTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('roster');
   const [rosterTab, setRosterTab] = useState('skaters');
@@ -72,8 +72,9 @@ const TeamDetail = () => {
           pwhlLeagueAPI.getStandings({ season: '2025-2026' }),
         ]);
 
-        const allTeams = teamsRes.data || [];
-        const found = allTeams.find(t => t.abbreviation?.toUpperCase() === abbr?.toUpperCase());
+        const allTeamsData = teamsRes.data || [];
+        setAllTeams(allTeamsData);
+        const found = allTeamsData.find(t => t.abbreviation?.toUpperCase() === abbr?.toUpperCase());
         if (!found) { setLoading(false); return; }
         setTeam(found);
 
@@ -109,6 +110,7 @@ const TeamDetail = () => {
 
   const primaryColor = team.primary_color || 'var(--pink)';
   const secondaryColor = team.secondary_color || 'rgba(255,255,255,0.1)';
+  const teamLogoMap = allTeams.reduce((acc, t) => { if (t.abbreviation) acc[t.abbreviation] = t.logo_url; return acc; }, {});
 
   // Must be declared before sortPlayers which calls it
   const getNumericVal = (player, key) => {
@@ -231,73 +233,18 @@ const TeamDetail = () => {
             ))}
           </div>
 
-          <div style={s.tableCard}>
-            <div className="pwhl-table-scroll">
-              <div style={{ minWidth: '480px' }}>
-                <div style={s.tableHeader}>
-                  {cols.map((col, i) => {
-                    const sortable = col.key !== 'name' && col.key !== 'position';
-                    const isActive = sortKey === col.key;
-                    return (
-                      <div
-                        key={col.key}
-                        style={{
-                          ...s.th,
-                          ...(col.flex ? { flex: 1, minWidth: '44px' } : { width: col.width, minWidth: col.width }),
-                          textAlign: i === 0 ? 'left' : 'center',
-                          color: isActive ? 'var(--pink)' : col.highlight ? 'var(--pink)' : 'rgba(255,255,255,0.7)',
-                          cursor: sortable ? 'pointer' : 'default',
-                          userSelect: 'none',
-                        }}
-                        onClick={() => handleSort(col.key)}
-                      >
-                        {col.label}
-                        {sortable && isActive && (
-                          <i className={`fas fa-caret-${sortDir === 'desc' ? 'down' : 'up'}`}
-                            style={{ marginLeft: '4px', fontSize: '0.65rem' }} />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                {displayRoster.length === 0 ? (
-                  <div style={s.empty}>
-                    No {rosterTab} found for this team
-                    {rosterTab === 'goalies' && ' — goalie data may not yet be in the database'}
-                  </div>
-                ) : displayRoster.map((player, idx) => (
-                  <div key={player.id}
-                    style={{ ...s.tableRow, background: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)', cursor: 'pointer' }}
-                    onClick={() => navigate(`/player/${player.slug || player.id}`)}
-                  >
-                    {cols.map((col, i) => (
-                      <div key={col.key} style={{
-                        ...s.td,
-                        ...(col.flex ? { flex: 1, minWidth: '44px' } : { width: col.width, minWidth: col.width }),
-                        textAlign: i === 0 ? 'left' : 'center',
-                        color: col.highlight ? 'var(--pink)' : '#fff',
-                        fontWeight: col.highlight ? '700' : i === 0 ? '600' : '400',
-                      }}>
-                        {col.key === 'name' ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <PlayerAvatar src={player.headshot_url} name={`${player.first_name} ${player.last_name}`} position={player.position} size={28} />
-                            <div>
-                              <div style={{ color: '#fff', fontSize: '0.875rem' }}>{player.first_name} {player.last_name}</div>
-                              {player.jersey_number && <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>#{player.jersey_number}</div>}
-                            </div>
-                          </div>
-                        ) : col.key === 'position' ? (
-                          <PosBadge pos={player.position} />
-                        ) : (
-                          getVal(player, col.key)
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <PlayerStatsTable
+            players={displayRoster}
+            cols={cols}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onSort={handleSort}
+            teamLogoMap={teamLogoMap}
+            onPlayerClick={player => navigate(`/player/${player.slug || player.id}`)}
+            emptyMessage={rosterTab === 'goalies'
+              ? 'No goalies found — goalie data may not yet be in the database'
+              : 'No skaters found for this team'}
+          />
         </div>
       )}
 

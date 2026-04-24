@@ -1,293 +1,261 @@
-import React, { useState, useEffect } from 'react';
-import { pwhlLeagueAPI } from '../../services/pwhlAPI';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { pwhlLeagueAPI, pwhlPlayersAPI } from '../../services/pwhlAPI';
+
+const DEFAULT_UPCOMING = 5;
+const DEFAULT_RESULTS  = 5;
 
 const ScheduleView = () => {
-  const [upcoming, setUpcoming] = useState([]);
-  const [recent, setRecent] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('upcoming');
+  const navigate = useNavigate();
+  const [upcoming, setUpcoming]           = useState([]);
+  const [results, setResults]             = useState([]);
+  const [teams, setTeams]                 = useState([]);
+  const [loading, setLoading]             = useState(true);
+  const [selectedTeam, setSelectedTeam]   = useState('All');
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+  const [showAllResults, setShowAllResults]   = useState(false);
 
   useEffect(() => {
-    const fetchGames = async () => {
+    const fetchAll = async () => {
       setLoading(true);
       try {
-        const [upcomingRes, recentRes] = await Promise.all([
+        const [upRes, resRes, teamsRes] = await Promise.all([
           pwhlLeagueAPI.getUpcomingGames().catch(() => ({ data: [] })),
-          pwhlLeagueAPI.getGames({ status: 'final', limit: 20 }).catch(() => ({ data: [] })),
+          pwhlLeagueAPI.getGames({ status: 'final', limit: 50 }).catch(() => ({ data: [] })),
+          pwhlPlayersAPI.getAllTeams().catch(() => ({ data: [] })),
         ]);
-        setUpcoming(upcomingRes.data || []);
-        // Sort recent by date descending
-        const recentData = (recentRes.data || []).sort(
+
+        // Upcoming: soonest first
+        const up = (upRes.data || []).sort(
+          (a, b) => new Date(a.game_time || a.game_date) - new Date(b.game_time || b.game_date)
+        );
+        // Results: most recent first
+        const res = (resRes.data || []).sort(
           (a, b) => new Date(b.game_time || b.game_date) - new Date(a.game_time || a.game_date)
         );
-        setRecent(recentData);
+
+        setUpcoming(up);
+        setResults(res);
+        setTeams(teamsRes.data || []);
       } catch (err) {
-        console.error('Error fetching games:', err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchGames();
+    fetchAll();
   }, []);
 
-  const games = activeTab === 'upcoming' ? upcoming : recent;
+  // Filter both sections by team
+  const filterGames = (games) => {
+    if (selectedTeam === 'All') return games;
+    return games.filter(g =>
+      g.home_team === selectedTeam || g.away_team === selectedTeam
+    );
+  };
+
+  const filteredUpcoming = useMemo(() => filterGames(upcoming), [upcoming, selectedTeam]);
+  const filteredResults  = useMemo(() => filterGames(results),  [results, selectedTeam]);
+
+  const visibleUpcoming = showAllUpcoming ? filteredUpcoming : filteredUpcoming.slice(0, DEFAULT_UPCOMING);
+  const visibleResults  = showAllResults  ? filteredResults  : filteredResults.slice(0, DEFAULT_RESULTS);
+
+  if (loading) return <div style={s.loading}><i className="fas fa-spinner fa-spin" style={{ marginRight: '8px' }} />Loading schedule...</div>;
 
   return (
     <div>
-      {/* Toggle */}
-      <div style={styles.toggleRow}>
-        {['upcoming', 'results'].map(tab => (
-          <button
-            key={tab}
-            style={{ ...styles.toggleBtn, ...(activeTab === tab ? styles.toggleBtnActive : {}) }}
-            onClick={() => setActiveTab(tab)}
+      {/* Team filter */}
+      <div className="pwhl-filter-chips" style={{ marginBottom: '1.25rem' }}>
+        <button className={`pwhl-chip ${selectedTeam === 'All' ? 'active' : ''}`}
+          onClick={() => { setSelectedTeam('All'); setShowAllUpcoming(false); setShowAllResults(false); }}>
+          All Teams
+        </button>
+        {teams.map(t => (
+          <button key={t.abbreviation}
+            className={`pwhl-chip ${selectedTeam === t.abbreviation ? 'active' : ''}`}
+            onClick={() => { setSelectedTeam(t.abbreviation); setShowAllUpcoming(false); setShowAllResults(false); }}
+            title={t.name}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
           >
-            <i className={tab === 'upcoming' ? 'fas fa-calendar-alt' : 'fas fa-flag-checkered'} style={{ marginRight: '7px' }} />
-            {tab === 'upcoming' ? 'Upcoming' : 'Results'}
+            {t.logo_url && <img src={t.logo_url} alt={t.abbreviation} style={{ width: '14px', height: '14px', objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />}
+            {t.abbreviation}
           </button>
         ))}
       </div>
 
-      {loading ? (
-        <div style={styles.loading}>Loading games...</div>
-      ) : games.length === 0 ? (
-        <div style={styles.loading}>No games found</div>
+      {/* ── Upcoming ── */}
+      <div style={s.sectionHeader}>
+        <span style={s.sectionTitle}>
+          <i className="fas fa-calendar-alt" style={{ marginRight: '8px', color: 'var(--pink)' }} />
+          Upcoming{selectedTeam !== 'All' ? ` · ${selectedTeam}` : ''}
+        </span>
+        <span style={s.sectionCount}>{filteredUpcoming.length} game{filteredUpcoming.length !== 1 ? 's' : ''}</span>
+      </div>
+
+      {filteredUpcoming.length === 0 ? (
+        <div style={s.empty}>No upcoming games{selectedTeam !== 'All' ? ` for ${selectedTeam}` : ''}</div>
       ) : (
-        <div style={styles.gamesList}>
-          {groupByDate(games).map(({ dateLabel, games: dayGames }) => (
-            <div key={dateLabel} style={styles.dateGroup}>
-              <div style={styles.dateLabel}>{dateLabel}</div>
-              {dayGames.map((game, idx) => (
-                <GameCard key={game.id || idx} game={game} />
-              ))}
-            </div>
-          ))}
-        </div>
+        <>
+          <div style={s.gameList}>
+            {visibleUpcoming.map((game, idx) => <GameCard key={game.id || idx} game={game} navigate={navigate} />)}
+          </div>
+          {filteredUpcoming.length > DEFAULT_UPCOMING && (
+            <button style={s.expandBtn} onClick={() => setShowAllUpcoming(v => !v)}>
+              <i className={`fas fa-chevron-${showAllUpcoming ? 'up' : 'down'}`} style={{ marginRight: '6px' }} />
+              {showAllUpcoming ? 'Show fewer' : `Show all ${filteredUpcoming.length} upcoming games`}
+            </button>
+          )}
+        </>
+      )}
+
+      <div style={s.divider} />
+
+      {/* ── Results ── */}
+      <div style={s.sectionHeader}>
+        <span style={s.sectionTitle}>
+          <i className="fas fa-flag-checkered" style={{ marginRight: '8px', color: 'rgba(255,255,255,0.5)' }} />
+          Results{selectedTeam !== 'All' ? ` · ${selectedTeam}` : ''}
+        </span>
+        <span style={s.sectionCount}>{filteredResults.length} game{filteredResults.length !== 1 ? 's' : ''}</span>
+      </div>
+
+      {filteredResults.length === 0 ? (
+        <div style={s.empty}>No results yet{selectedTeam !== 'All' ? ` for ${selectedTeam}` : ''}</div>
+      ) : (
+        <>
+          <div style={s.gameList}>
+            {visibleResults.map((game, idx) => <GameCard key={game.id || idx} game={game} navigate={navigate} />)}
+          </div>
+          {filteredResults.length > DEFAULT_RESULTS && (
+            <button style={s.expandBtn} onClick={() => setShowAllResults(v => !v)}>
+              <i className={`fas fa-chevron-${showAllResults ? 'up' : 'down'}`} style={{ marginRight: '6px' }} />
+              {showAllResults ? 'Show fewer' : `Show all ${filteredResults.length} results`}
+            </button>
+          )}
+        </>
       )}
     </div>
   );
 };
 
-const GameCard = ({ game }) => {
+const GameCard = ({ game, navigate }) => {
   const [hovered, setHovered] = useState(false);
-  const isLive = game.status === 'live';
-  const isFinal = game.status === 'final';
+  const isFinal    = game.status === 'final';
+  const isLive     = game.status === 'live';
+  const isUpcoming = !isFinal && !isLive;
 
-  const statusLabel = isLive ? 'LIVE' : isFinal ? 'FINAL' : formatTime(game.game_time);
-  const statusColor = isLive ? '#ff4444' : isFinal ? 'rgba(255,255,255,0.4)' : 'var(--pink)';
+  const dateStr = (() => {
+    const d = game.game_time || game.game_date;
+    if (!d) return '—';
+    const dt = new Date(d);
+    const today    = new Date(); today.setHours(0,0,0,0);
+    const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+    const gameDay  = new Date(dt); gameDay.setHours(0,0,0,0);
+    if (gameDay.getTime() === today.getTime())    return 'Today';
+    if (gameDay.getTime() === tomorrow.getTime()) return 'Tomorrow';
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  })();
+
+  const timeStr = (() => {
+    if (!game.game_time) return '';
+    try { return new Date(game.game_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }); }
+    catch { return ''; }
+  })();
 
   return (
     <div
-      style={{
-        ...styles.gameCard,
-        ...(hovered ? styles.gameCardHover : {}),
-      }}
+      style={{ ...s.card, background: hovered ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* Date label */}
+      <div style={s.dateCol}>
+        <div style={{ fontWeight: '600', color: isUpcoming ? 'var(--pink)' : 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>{dateStr}</div>
+        {isUpcoming && timeStr && <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', marginTop: '2px' }}>{timeStr}</div>}
+        {isFinal && <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', marginTop: '2px' }}>FINAL{game.is_overtime ? ' (OT)' : ''}</div>}
+        {isLive  && <div style={{ fontSize: '0.68rem', color: '#ff4444', fontWeight: '700', marginTop: '2px' }}>LIVE</div>}
+      </div>
+
       {/* Away team */}
-      <TeamSide
-        name={game.away_team_name || game.away_team}
+      <TeamBlock
         abbr={game.away_team}
+        name={game.away_team_name}
         logo={game.away_logo_url}
         score={game.away_score}
         showScore={isFinal || isLive}
         isWinner={isFinal && game.away_score > game.home_score}
+        navigate={navigate}
       />
 
-      {/* Status / Score */}
-      <div style={styles.gameCenter}>
-        {(isFinal || isLive) ? (
-          <div style={styles.scoreBlock}>
-            <div style={styles.scoreDisplay}>
-              <span style={{ color: game.away_score > game.home_score ? '#fff' : 'rgba(255,255,255,0.80)' }}>
-                {game.away_score ?? 0}
-              </span>
-              <span style={{ color: 'rgba(255,255,255,0.50)', margin: '0 8px' }}>–</span>
-              <span style={{ color: game.home_score > game.away_score ? '#fff' : 'rgba(255,255,255,0.80)' }}>
-                {game.home_score ?? 0}
-              </span>
-            </div>
-            <div style={{ color: statusColor, fontSize: '0.7rem', fontWeight: '700', letterSpacing: '0.08em', marginTop: '4px' }}>
-              {statusLabel}
-              {game.is_overtime && ' (OT)'}
-            </div>
+      {/* VS / Score divider */}
+      <div style={s.centerCol}>
+        {isFinal || isLive ? (
+          <div style={{ textAlign: 'center' }}>
+            <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#fff' }}>{game.away_score ?? 0}</span>
+            <span style={{ color: 'rgba(255,255,255,0.3)', margin: '0 6px' }}>–</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: '700', color: '#fff' }}>{game.home_score ?? 0}</span>
           </div>
         ) : (
-          <div style={styles.upcomingCenter}>
-            <div style={{ color: 'var(--pink)', fontSize: '0.85rem', fontWeight: '600' }}>
-              {statusLabel}
-            </div>
-            <div style={{ color: 'rgba(255,255,255,0.50)', fontSize: '0.7rem', marginTop: '3px' }}>
-              {game.venue || ''}
-            </div>
-          </div>
+          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', fontWeight: '600' }}>VS</span>
         )}
       </div>
 
       {/* Home team */}
-      <TeamSide
-        name={game.home_team_name || game.home_team}
+      <TeamBlock
         abbr={game.home_team}
+        name={game.home_team_name}
         logo={game.home_logo_url}
         score={game.home_score}
         showScore={isFinal || isLive}
         isWinner={isFinal && game.home_score > game.away_score}
+        navigate={navigate}
         alignRight
       />
+
+      {/* Venue */}
+      {isUpcoming && game.venue && (
+        <div style={s.venueCol}>{game.venue}</div>
+      )}
     </div>
   );
 };
 
-const TeamSide = ({ name, abbr, logo, score, showScore, isWinner, alignRight }) => (
-  <div style={{
-    ...styles.teamSide,
-    flexDirection: alignRight ? 'row-reverse' : 'row',
-    textAlign: alignRight ? 'right' : 'left',
-  }}>
+const TeamBlock = ({ abbr, name, logo, score, showScore, isWinner, navigate, alignRight }) => (
+  <div
+    style={{ ...s.teamBlock, flexDirection: alignRight ? 'row-reverse' : 'row', textAlign: alignRight ? 'right' : 'left', cursor: abbr ? 'pointer' : 'default' }}
+    onClick={() => abbr && navigate(`/team/${abbr}`)}
+    title={name || abbr}
+  >
     {logo ? (
-      <img src={logo} alt={abbr} style={styles.teamLogo} onError={e => { e.target.style.display = 'none'; }} />
+      <img src={logo} alt={abbr} style={s.logo} onError={e => { e.target.style.display = 'none'; }} />
     ) : (
-      <div style={styles.teamLogoPlaceholder}>{abbr?.slice(0, 2)}</div>
+      <div style={s.logoPlaceholder}>{abbr?.slice(0, 2)}</div>
     )}
     <div>
-      <div style={{
-        fontSize: '0.85rem',
-        fontWeight: isWinner ? '700' : '500',
-        color: isWinner ? '#fff' : 'rgba(255,255,255,0.88)',
-      }}>
+      <div style={{ fontWeight: isWinner ? '700' : '500', color: isWinner ? '#fff' : 'rgba(255,255,255,0.7)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
         {name || abbr}
       </div>
-      <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)' }}>{abbr}</div>
+      <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)' }}>{abbr}</div>
     </div>
   </div>
 );
 
-const groupByDate = (games) => {
-  const groups = {};
-  games.forEach(game => {
-    const raw = game.game_time || game.game_date;
-    const dateKey = raw ? new Date(raw).toDateString() : 'Unknown';
-    if (!groups[dateKey]) groups[dateKey] = [];
-    groups[dateKey].push(game);
-  });
-  return Object.entries(groups).map(([dateLabel, games]) => ({ dateLabel, games }));
-};
-
-const formatTime = (timeStr) => {
-  if (!timeStr) return 'TBD';
-  try {
-    return new Date(timeStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
-  } catch {
-    return timeStr;
-  }
-};
-
-const styles = {
-  toggleRow: {
-    display: 'flex',
-    gap: '8px',
-    marginBottom: '1.5rem',
-  },
-  toggleBtn: {
-    padding: '8px 20px',
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '8px',
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  toggleBtnActive: {
-    background: 'rgba(255,124,222,0.15)',
-    borderColor: 'rgba(255,124,222,0.4)',
-    color: 'var(--pink)',
-  },
-  loading: {
-    textAlign: 'center',
-    padding: '3rem',
-    color: 'rgba(255,255,255,0.65)',
-  },
-  gamesList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-  },
-  dateGroup: {},
-  dateLabel: {
-    fontSize: '0.8rem',
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-    color: 'rgba(255,255,255,0.65)',
-    marginBottom: '10px',
-    paddingLeft: '4px',
-  },
-  gameCard: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '16px 20px',
-    background: 'rgba(255,255,255,0.04)',
-    borderRadius: '12px',
-    border: '1px solid rgba(255,255,255,0.08)',
-    marginBottom: '8px',
-    transition: 'all 0.2s ease',
-  },
-  gameCardHover: {
-    background: 'rgba(255,255,255,0.07)',
-    borderColor: 'rgba(255,255,255,0.12)',
-  },
-  teamSide: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    flex: 1,
-  },
-  teamLogo: {
-    width: '40px',
-    height: '40px',
-    objectFit: 'contain',
-    flexShrink: 0,
-  },
-  teamLogoPlaceholder: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    background: 'rgba(255,255,255,0.1)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.75rem',
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.80)',
-    flexShrink: 0,
-  },
-  gameCenter: {
-    textAlign: 'center',
-    minWidth: '100px',
-    padding: '0 16px',
-  },
-  scoreBlock: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  scoreDisplay: {
-    fontSize: '1.4rem',
-    fontWeight: '700',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  upcomingCenter: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
+const s = {
+  loading:       { textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.5)' },
+  empty:         { padding: '1.5rem', textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontSize: '0.875rem', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: '8px' },
+  sectionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' },
+  sectionTitle:  { fontSize: '1rem', fontWeight: '600', color: '#fff', display: 'flex', alignItems: 'center' },
+  sectionCount:  { fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)' },
+  divider:       { height: '1px', background: 'rgba(255,255,255,0.07)', margin: '20px 0' },
+  gameList:      { display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' },
+  card:          { display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)', transition: 'background 0.15s' },
+  dateCol:       { minWidth: '64px', flexShrink: 0 },
+  centerCol:     { flexShrink: 0, width: '72px', display: 'flex', justifyContent: 'center' },
+  venueCol:      { fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', marginLeft: 'auto', textAlign: 'right', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  teamBlock:     { display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 },
+  logo:          { width: '32px', height: '32px', objectFit: 'contain', flexShrink: 0 },
+  logoPlaceholder: { width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: '700', color: 'rgba(255,255,255,0.4)', flexShrink: 0 },
+  expandBtn:     { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: 'rgba(255,255,255,0.5)', fontSize: '0.82rem', cursor: 'pointer', transition: 'all 0.2s', marginBottom: '8px' },
 };
 
 export default ScheduleView;

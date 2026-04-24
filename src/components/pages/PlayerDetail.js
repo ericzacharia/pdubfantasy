@@ -209,7 +209,9 @@ const PlayerDetail = () => {
               rel="noopener noreferrer"
               style={styles.instagramLink}
             >
-              <i className="fab fa-instagram" style={{ fontSize: '1rem' }} />
+              <span style={styles.instagramIconWrap}>
+                <i className="fab fa-instagram" style={{ fontSize: '1rem' }} />
+              </span>
               <span>@{playerInstagram[player.slug].handle}</span>
             </a>
           )}
@@ -399,6 +401,7 @@ const styles = {
   newsTitle: { fontSize: '0.9rem', color: '#fff', fontWeight: '500', lineHeight: '1.4', marginBottom: '4px' },
   newsDate: { fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)' },
   instagramLink: { display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '10px', color: 'rgba(255,255,255,0.6)', fontSize: '0.875rem', textDecoration: 'none' },
+  instagramIconWrap: { background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1 },
 };
 
 export default PlayerDetail;

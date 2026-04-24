@@ -26,6 +26,7 @@ const SKATER_COLS = [
   { key: 'points',      label: 'PTS',     sortKey: 'points',         flex: true },
   { key: 'plus_minus',  label: '+/-',     sortKey: 'plus_minus',     flex: true },
   { key: 'shots',       label: 'SOG',     sortKey: 'shots',          flex: true },
+  { key: 'blocks',      label: 'BLK',     sortKey: 'blocks',         flex: true },
   { key: 'pim',         label: 'PIM',     sortKey: 'pim',            flex: true },
   { key: 'fantasy',     label: 'FP',      sortKey: 'fantasy_value',  flex: true, highlight: true },
 ];
@@ -179,6 +180,7 @@ const PlayersTable = () => {
       case 'points':     return stats.points ?? (stats.goals ?? 0) + (stats.assists ?? 0);
       case 'plus_minus': return stats.plus_minus ?? 0;
       case 'shots':      return stats.shots ?? 0;
+      case 'blocks':     return stats.blocks ?? 0;
       case 'pim':        return stats.penalty_minutes ?? 0;
       case 'wins':       return stats.wins ?? 0;
       case 'losses':     return stats.losses ?? 0;

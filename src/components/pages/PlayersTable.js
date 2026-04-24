@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import PlayerAvatar from '../PlayerAvatar';
 import { useWatchlist } from '../../hooks/useWatchlist';
-import { pwhlPlayersAPI, pwhlFantasyAPI, pwhlLeagueAPI } from '../../services/pwhlAPI';
-import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
+import { pwhlPlayersAPI, pwhlLeagueAPI } from '../../services/pwhlAPI';
 
 const POS_COLORS = { C:'#8b5cf6', LW:'#8b5cf6', RW:'#8b5cf6', F:'#8b5cf6', D:'#3b82f6', G:'#f59e0b' };
 
@@ -59,13 +58,11 @@ const QUICK_FILTERS = [
 const PlayersTable = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isPwhlAuthenticated } = usePwhlAuth();
   const { watchlist, toggle: toggleWatch, isWatched } = useWatchlist();
   const [playerType, setPlayerType] = useState('skaters');
   const [players, setPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [myRosterIds, setMyRosterIds] = useState(new Set());
   const [gameTodayIds, setGameTodayIds] = useState(new Set());
   const [perGame, setPerGame] = useState(false);
   const [showWatchlist, setShowWatchlist] = useState(false);
@@ -85,16 +82,6 @@ const PlayersTable = () => {
       .then(r => setTeams(r.data || []))
       .catch(() => {});
   }, []);
-
-  // Fetch which players are on the user's teams
-  useEffect(() => {
-    if (!isPwhlAuthenticated) return;
-    pwhlFantasyAPI.getMyTeams().then(r => {
-      const ids = new Set();
-      // For each team, we'd need roster — approximate with team data for now
-      setMyRosterIds(ids);
-    }).catch(() => {});
-  }, [isPwhlAuthenticated]);
 
   // Fetch players with games today
   useEffect(() => {

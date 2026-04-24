@@ -172,10 +172,11 @@ const TrendsView = () => {
         </div>
       ) : (
         <div style={styles.grid}>
-          {filtered.map(trend => (
+          {filtered.map((trend, idx) => (
             <TrendCard
               key={trend.id}
               trend={trend}
+              idx={idx}
               teamLogos={teamLogos}
               playerData={playerData}
               navigate={navigate}
@@ -187,9 +188,10 @@ const TrendsView = () => {
   );
 };
 
-const TrendCard = ({ trend, teamLogos, playerData, navigate }) => {
+const TrendCard = ({ trend, idx, teamLogos, playerData, navigate }) => {
   const [hovered, setHovered] = useState(false);
   const sev = SEVERITY_STYLES[trend.severity] || SEVERITY_STYLES.info;
+  const altBg = idx % 2 === 1 ? 'rgba(106,0,255,0.06)' : 'rgba(255,255,255,0.04)';
   const teamLogo = trend.team && teamLogos[trend.team];
   const playerInfo = trend.player && playerData[trend.player];
 
@@ -197,7 +199,7 @@ const TrendCard = ({ trend, teamLogos, playerData, navigate }) => {
     <div
       style={{
         ...styles.card,
-        background: hovered ? sev.bg : 'rgba(255,255,255,0.04)',
+        background: hovered ? sev.bg : altBg,
         borderColor: hovered ? sev.border : 'rgba(255,255,255,0.08)',
       }}
       onMouseEnter={() => setHovered(true)}

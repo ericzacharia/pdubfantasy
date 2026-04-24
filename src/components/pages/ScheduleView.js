@@ -28,13 +28,14 @@ const ScheduleView = () => {
           pwhlPlayersAPI.getAllTeams().catch(() => ({ data: [] })),
         ]);
 
+        const parseD = (d) => d ? (d.includes('T') ? new Date(d) : new Date(d + 'T00:00:00')) : new Date(0);
         // Upcoming: soonest first
         const up = (upRes.data || []).sort(
-          (a, b) => new Date(a.game_time || a.game_date) - new Date(b.game_time || b.game_date)
+          (a, b) => parseD(a.game_time || a.game_date) - parseD(b.game_time || b.game_date)
         );
         // Results: most recent first
         const res = (resRes.data || []).sort(
-          (a, b) => new Date(b.game_time || b.game_date) - new Date(a.game_time || a.game_date)
+          (a, b) => parseD(b.game_time || b.game_date) - parseD(a.game_time || a.game_date)
         );
 
         setUpcoming(up);
@@ -155,13 +156,17 @@ const GameCard = ({ game, navigate }) => {
   const isFinal    = game.status === 'final';
   const isLive     = game.status === 'live';
   const isUpcoming = !isFinal && !isLive;
-  const gameDate   = new Date(game.game_time || game.game_date || 0);
+  // Parse date strings as local time (not UTC) to avoid off-by-one-day in Eastern time
+  const parseGameDate = (d) => d
+    ? (d.includes('T') ? new Date(d) : new Date(d + 'T00:00:00'))
+    : null;
+  const gameDate   = parseGameDate(game.game_time || game.game_date) || new Date(0);
   const isPreseason = gameDate < REGULAR_SEASON_START;
 
   const dateStr = (() => {
     const d = game.game_time || game.game_date;
     if (!d) return '—';
-    const dt = new Date(d);
+    const dt = parseGameDate(d);
     const today    = new Date(); today.setHours(0,0,0,0);
     const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
     const gameDay  = new Date(dt); gameDay.setHours(0,0,0,0);

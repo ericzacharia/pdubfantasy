@@ -128,6 +128,7 @@ const CurrentMatchupCard = ({ matchup, week }) => {
           team={matchup.my_team_side === 'a' ? matchup.team_a : matchup.team_b}
           points={matchup.my_points}
           isWinner={isCompleted && matchup.winner_id === (matchup.my_team_side === 'a' ? matchup.team_a?.id : matchup.team_b?.id)}
+          beatMedian={matchup.my_beat_median}
           isMe
         />
         <div style={styles.vsLabel}>VS</div>
@@ -135,13 +136,21 @@ const CurrentMatchupCard = ({ matchup, week }) => {
           team={matchup.my_team_side === 'a' ? matchup.team_b : matchup.team_a}
           points={matchup.opp_points}
           isWinner={isCompleted && matchup.winner_id !== (matchup.my_team_side === 'a' ? matchup.team_a?.id : matchup.team_b?.id)}
+          beatMedian={matchup.opp_beat_median}
         />
       </div>
+      {matchup.league_median_score != null && isCompleted && (
+        <div style={{ textAlign: 'center', marginTop: '14px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '12px' }}>
+          <i className="fas fa-chart-bar" style={{ marginRight: '6px' }} />
+          League median: <strong style={{ color: 'rgba(255,255,255,0.7)' }}>{matchup.league_median_score.toFixed(1)} pts</strong>
+          <span style={{ marginLeft: '6px', fontSize: '0.72rem' }}>— scoring above median counts as an extra win</span>
+        </div>
+      )}
     </div>
   );
 };
 
-const TeamScore = ({ team, points, isWinner, isMe }) => (
+const TeamScore = ({ team, points, isWinner, isMe, beatMedian }) => (
   <div style={{ ...styles.teamScore, opacity: isMe ? 1 : 0.85 }}>
     <div style={{ ...styles.teamScoreName, color: isWinner ? 'var(--pink)' : '#fff', fontWeight: isMe ? '700' : '500' }}>
       {team?.name || '—'}
@@ -152,19 +161,57 @@ const TeamScore = ({ team, points, isWinner, isMe }) => (
     </div>
     <div style={styles.teamScoreLabel}>pts</div>
     {isWinner && <div style={styles.winnerBadge}>WIN</div>}
+    {beatMedian != null && (
+      <div style={{ fontSize: '0.72rem', marginTop: '6px', color: beatMedian ? '#00c853' : '#ef4444', fontWeight: '600' }}>
+        {beatMedian ? '↑ Beat median' : '↓ Below median'}
+      </div>
+    )}
   </div>
 );
 
-const MatchupCard = ({ matchup }) => (
-  <div style={styles.matchupRow}>
-    <span style={{ color: '#fff', flex: 1 }}>{matchup.team_a?.name || 'TBD'}</span>
-    <span style={styles.matchupScore}>
-      {(matchup.team_a_points || 0).toFixed(1)} – {(matchup.team_b_points || 0).toFixed(1)}
-    </span>
-    <span style={{ color: '#fff', flex: 1, textAlign: 'right' }}>{matchup.team_b?.name || 'BYE'}</span>
-    {matchup.is_my_matchup && <span style={styles.myMatchupTag}>You</span>}
-  </div>
-);
+const MatchupCard = ({ matchup }) => {
+  const aWon = matchup.winner_id && matchup.winner_id === matchup.team_a?.id;
+  const bWon = matchup.winner_id && matchup.winner_id === matchup.team_b?.id;
+  const hasScores = (matchup.team_a_points || 0) + (matchup.team_b_points || 0) > 0;
+  const hasMedian = matchup.league_median_score != null;
+
+  return (
+    <div style={styles.matchupRow}>
+      <span style={{ color: aWon ? 'var(--pink)' : '#fff', flex: 1, fontWeight: aWon ? '700' : '400' }}>
+        {matchup.team_a?.name || 'TBD'}
+        {matchup.is_my_matchup && matchup.my_team_side === 'a' && (
+          <span style={styles.myMatchupTag}>You</span>
+        )}
+      </span>
+      <div style={{ textAlign: 'center', minWidth: '110px' }}>
+        <div style={styles.matchupScore}>
+          {hasScores
+            ? `${(matchup.team_a_points || 0).toFixed(1)} – ${(matchup.team_b_points || 0).toFixed(1)}`
+            : '— vs —'
+          }
+        </div>
+        {hasMedian && hasScores && (
+          <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', marginTop: '2px' }}>
+            median {matchup.league_median_score.toFixed(1)}
+            {' '}·{' '}
+            <span style={{ color: matchup.team_a_beat_median ? '#00c853' : '#ef4444' }}>
+              {matchup.team_a_beat_median ? '↑' : '↓'}
+            </span>
+            <span style={{ color: matchup.team_b_beat_median ? '#00c853' : '#ef4444' }}>
+              {matchup.team_b_beat_median ? '↑' : '↓'}
+            </span>
+          </div>
+        )}
+      </div>
+      <span style={{ color: bWon ? 'var(--pink)' : '#fff', flex: 1, textAlign: 'right', fontWeight: bWon ? '700' : '400' }}>
+        {matchup.team_b?.name || 'BYE'}
+        {matchup.is_my_matchup && matchup.my_team_side === 'b' && (
+          <span style={styles.myMatchupTag}>You</span>
+        )}
+      </span>
+    </div>
+  );
+};
 
 const ScheduleTable = ({ matchups }) => {
   const byWeek = matchups.reduce((acc, m) => {

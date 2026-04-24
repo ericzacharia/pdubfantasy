@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { pwhlLeagueAPI, pwhlPlayersAPI } from '../../services/pwhlAPI';
 
 const DEFAULT_UPCOMING = 5;
+// 2025-26 regular season opened November 21, 2025
+const REGULAR_SEASON_START = new Date('2025-11-21T00:00:00');
 const DEFAULT_RESULTS  = 5;
 
 const ScheduleView = () => {
@@ -143,6 +145,8 @@ const GameCard = ({ game, navigate }) => {
   const isFinal    = game.status === 'final';
   const isLive     = game.status === 'live';
   const isUpcoming = !isFinal && !isLive;
+  const gameDate   = new Date(game.game_time || game.game_date || 0);
+  const isPreseason = gameDate < REGULAR_SEASON_START;
 
   const dateStr = (() => {
     const d = game.game_time || game.game_date;
@@ -174,6 +178,11 @@ const GameCard = ({ game, navigate }) => {
         {isUpcoming && timeStr && <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', marginTop: '2px' }}>{timeStr}</div>}
         {isFinal && <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', marginTop: '2px' }}>FINAL{game.is_overtime ? ' (OT)' : ''}</div>}
         {isLive  && <div style={{ fontSize: '0.68rem', color: '#ff4444', fontWeight: '700', marginTop: '2px' }}>LIVE</div>}
+        {isPreseason && (
+          <div style={{ fontSize: '0.62rem', fontWeight: '700', color: '#a78bfa', background: 'rgba(167,139,250,0.12)', border: '1px solid rgba(167,139,250,0.25)', borderRadius: '4px', padding: '1px 5px', marginTop: '3px', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'inline-block' }}>
+            Preseason
+          </div>
+        )}
       </div>
 
       {/* Away team */}

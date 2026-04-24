@@ -95,7 +95,7 @@ const ScoringBreakdown = () => {
                 {activePlayers.map((player, i) => (
                   <div
                     key={player.player_id}
-                    style={{ ...styles.tableRow, background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)', cursor: 'pointer' }}
+                    style={{ ...styles.tableRow, background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.04)', cursor: 'pointer' }}
                     onClick={() => navigate(`/player/${player.player_id}`)}
                   >
                     <div style={{ ...styles.td, width: '180px', display: 'flex', alignItems: 'center', gap: '8px' }}>

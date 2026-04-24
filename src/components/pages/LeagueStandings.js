@@ -44,7 +44,7 @@ const StandingRow = ({ team, rank, navigate }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <div
-      style={{ ...styles.row, background: hovered ? 'rgba(255,255,255,0.05)' : 'transparent', cursor: navigate ? 'pointer' : 'default' }}
+      style={{ ...styles.row, background: hovered ? 'rgba(255,255,255,0.07)' : (rank % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)'), cursor: navigate ? 'pointer' : 'default' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => navigate && team.team_id && navigate(`/teams/${team.team_id}`)}

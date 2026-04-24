@@ -163,7 +163,7 @@ const MyTeamView = () => {
                   <div style={styles.emptyRow}>No {playerType} on roster</div>
                 ) : (
                   displayRoster.map((player, idx) => (
-                    <RosterRow key={player.roster_id || idx} player={player} isSkatersView={playerType === 'skaters'} />
+                    <RosterRow key={player.roster_id || idx} player={player} isSkatersView={playerType === 'skaters'} idx={idx} />
                   ))
                 )}
               </div>
@@ -287,13 +287,13 @@ const MyTeamView = () => {
 
 const ROSTER_WIDTHS = ['160px', '50px', '55px', '45px', '45px', '45px', '50px', '50px', '60px', '60px'];
 
-const RosterRow = ({ player, isSkatersView }) => {
+const RosterRow = ({ player, isSkatersView, idx }) => {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
   const stats = player;
   return (
     <div
-      style={{ ...styles.tableRow, background: hovered ? 'rgba(255,255,255,0.05)' : 'transparent', cursor: 'pointer' }}
+      style={{ ...styles.tableRow, background: hovered ? 'rgba(255,255,255,0.07)' : (idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)'), cursor: 'pointer' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => navigate(`/player/${player.player_id}`)}

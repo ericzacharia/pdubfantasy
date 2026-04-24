@@ -16,8 +16,6 @@ const PosBadge = ({ pos }) => {
 
 const SKATER_COLS = [
   { key: 'name',        label: 'Player',  sortKey: 'name',          width: '200px', sticky: true },
-  { key: 'team',        label: 'Team',    sortKey: null,             width: '55px' },
-  { key: 'gp',          label: 'GP',      sortKey: 'games_played',   width: '50px' },
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   width: '50px' },
   { key: 'goals',       label: 'G',       sortKey: 'goals',          width: '45px' },
   { key: 'assists',     label: 'A',       sortKey: 'assists',        width: '45px' },
@@ -322,7 +320,7 @@ const PlayerRow = ({ player, cols, getCellValue, idx, navigate }) => {
     <div
       style={{
         ...styles.tableRow,
-        background: hovered ? 'rgba(255,255,255,0.05)' : (idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'),
+        background: hovered ? 'rgba(255,255,255,0.05)' : (idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.04)'),
         cursor: 'pointer',
       }}
       onClick={() => navigate(`/player/${player.id}`)}

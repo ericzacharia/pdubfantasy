@@ -192,7 +192,7 @@ const PlayerDetail = () => {
                 <div style={styles.emptyRow}>No season stats available</div>
               ) : (
                 allStats.map((s, i) => (
-                  <div key={i} style={{ ...styles.tableRow, background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
+                  <div key={i} style={{ ...styles.tableRow, background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.04)' }}>
                     <div style={{ ...styles.td, width: '110px', color: '#fff', fontWeight: '600' }}>{s.season}</div>
                     {statLabels.map(stat => (
                       <div key={stat.key} style={{ ...styles.td, flex: 1, textAlign: 'center', color: stat.highlight ? 'var(--pink)' : 'rgba(255,255,255,0.9)', fontWeight: stat.highlight ? '700' : '400' }}>

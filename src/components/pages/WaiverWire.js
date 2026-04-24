@@ -189,10 +189,11 @@ const WaiverWire = () => {
           {filtered.length === 0 ? (
             <div style={styles.empty}>No available players found</div>
           ) : (
-            filtered.map(player => (
+            filtered.map((player, idx) => (
               <WaiverPlayerRow
                 key={player.id}
                 player={player}
+                idx={idx}
                 isFaab={isFaab}
                 onAdd={() => setClaimModal({ player })}
                 navigate={navigate}
@@ -217,12 +218,12 @@ const WaiverWire = () => {
   );
 };
 
-const WaiverPlayerRow = ({ player, isFaab, onAdd, navigate }) => {
+const WaiverPlayerRow = ({ player, idx, isFaab, onAdd, navigate }) => {
   const [hovered, setHovered] = useState(false);
   const isGoalie = player.position === 'G';
   return (
     <div
-      style={{ ...styles.playerRow, background: hovered ? 'rgba(255,255,255,0.05)' : 'transparent' }}
+      style={{ ...styles.playerRow, background: hovered ? 'rgba(255,255,255,0.07)' : (idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)') }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >

@@ -140,6 +140,7 @@ const StandingsTable = () => {
                   key={team.id || idx}
                   team={team}
                   rank={idx}
+                  idx={idx}
                   cols={COLS}
                   getCellValue={getCellValue}
                   onRosterClick={() => openRoster(team)}
@@ -153,13 +154,13 @@ const StandingsTable = () => {
   );
 };
 
-const StandingRow = ({ team, rank, cols, getCellValue, onRosterClick }) => {
+const StandingRow = ({ team, rank, cols, getCellValue, onRosterClick, idx }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <div
       style={{
         ...styles.tableRow,
-        background: hovered ? 'rgba(255,255,255,0.05)' : 'transparent',
+        background: hovered ? 'rgba(255,255,255,0.07)' : idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)',
         cursor: 'pointer',
       }}
       onClick={onRosterClick}

@@ -321,7 +321,7 @@ const DraftView = () => {
               myPicks.map(pick => (
                 <div key={pick.pick_number} style={styles.pickRow}>
                   <span style={{ color: 'rgba(255,255,255,0.50)', fontSize: '0.75rem', minWidth: '24px' }}>#{pick.pick_number}</span>
-                  <span style={{ color: '#fff', fontSize: '0.85rem', flex: 1 }}>{pick.player_name || `Player #${pick.player_id}`}</span>
+                  <span style={{ color: '#fff', fontSize: '0.85rem', flex: 1 }}>{pick.player_name || (pick.player_id ? `Player #${pick.player_id}` : <em style={{ color: 'rgba(255,255,255,0.3)' }}>Pending</em>)}</span>
                   <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.75rem' }}>{pick.position || ''}</span>
                 </div>
               ))
@@ -340,7 +340,7 @@ const DraftView = () => {
               {showBoard && draftState.picks.slice(-20).reverse().map(pick => (
                 <div key={pick.pick_number} style={styles.boardRow}>
                   <span style={{ color: 'rgba(255,255,255,0.50)', fontSize: '0.72rem', minWidth: '24px' }}>#{pick.pick_number}</span>
-                  <span style={{ color: '#fff', fontSize: '0.8rem', flex: 1 }}>{pick.player_name || `Player #${pick.player_id}`}</span>
+                  <span style={{ color: pick.player_name ? '#fff' : 'rgba(255,255,255,0.3)', fontSize: '0.8rem', flex: 1 }}>{pick.player_name || (pick.is_made ? '—' : 'Pending')}</span>
                   <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.72rem', textAlign: 'right' }}>{pick.team_name || ''}</span>
                 </div>
               ))}

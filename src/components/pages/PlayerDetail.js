@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PlayerAvatar from '../PlayerAvatar';
 import PlayerStatusBadge from '../PlayerStatusBadge';
+import { useWatchlist } from '../../hooks/useWatchlist';
 import { pwhlPlayersAPI } from '../../services/pwhlAPI';
 
 const STAT_LABELS_SKATER = [
@@ -35,6 +36,8 @@ const PlayerDetail = () => {
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('stats');
+  const [gameLog, setGameLog] = useState([]);
+  const { isWatched, toggle: toggleWatch } = useWatchlist();
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -46,10 +49,14 @@ const PlayerDetail = () => {
           pwhlPlayersAPI.getPlayerNews(playerId).catch(() => ({ data: [] })),
         ]);
         setPlayer(playerRes.data);
-        // Season totals only, sorted newest first
-        const seasonStats = (statsRes.data || []).filter(s => s.is_season_total);
+        const allStats = statsRes.data || [];
+        const seasonStats = allStats.filter(s => s.is_season_total);
         seasonStats.sort((a, b) => b.season.localeCompare(a.season));
         setAllStats(seasonStats);
+        // Game log = per-game entries for current season, newest first
+        const gameLogs = allStats.filter(s => !s.is_season_total && s.season === '2025-2026');
+        gameLogs.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        setGameLog(gameLogs.slice(0, 25));
         setNews(newsRes.data || []);
       } catch (err) {
         console.error(err);
@@ -76,10 +83,23 @@ const PlayerDetail = () => {
 
   return (
     <div style={styles.page}>
-      {/* Back */}
-      <button style={styles.backBtn} onClick={() => navigate(-1)}>
-        <i className="fas fa-chevron-left" style={{ marginRight: '6px' }} />Back
-      </button>
+      {/* Back + actions */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+        <button className="pwhl-back-btn" onClick={() => navigate('/hub')} aria-label="Back to players">
+          <i className="fas fa-chevron-left" />Players
+        </button>
+        <button
+          className={`pwhl-star ${isWatched(player?.id) ? 'active' : ''}`}
+          style={{ fontSize: '1.1rem', padding: '6px 10px' }}
+          onClick={() => toggleWatch(player.id)}
+          aria-label={isWatched(player?.id) ? 'Remove from watchlist' : 'Add to watchlist'}
+        >
+          <i className={isWatched(player?.id) ? 'fas fa-star' : 'far fa-star'} />
+          <span style={{ fontSize: '0.78rem', marginLeft: '5px', color: 'var(--text-muted)' }}>
+            {isWatched(player?.id) ? 'Watching' : 'Watch'}
+          </span>
+        </button>
+      </div>
 
       {/* Hero */}
       <div style={styles.hero}>
@@ -165,7 +185,7 @@ const PlayerDetail = () => {
 
       {/* Tabs */}
       <div style={styles.tabs}>
-        {[['stats', 'Season Stats'], ['news', `News (${news.length})`]].map(([id, label]) => (
+        {[['stats', 'Season Stats'], ['gamelog', `Game Log (${gameLog.length})`], ['news', `News (${news.length})`]].map(([id, label]) => (
           <button
             key={id}
             style={{ ...styles.tab, ...(activeTab === id ? styles.tabActive : {}) }}
@@ -201,6 +221,46 @@ const PlayerDetail = () => {
                     ))}
                   </div>
                 ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Game log tab */}
+      {activeTab === 'gamelog' && (
+        <div style={styles.tableCard}>
+          <div className="pwhl-table-scroll">
+            <div style={{ minWidth: isGoalie ? '420px' : '460px' }}>
+              <div style={styles.tableHeader}>
+                <div style={{ ...styles.th, width: '70px', textAlign: 'left' }}>Date</div>
+                {(isGoalie
+                  ? [{key:'goals_against',label:'GA'},{key:'saves',label:'SV'},{key:'save_percentage',label:'SV%',dec:3},{key:'wins',label:'W'},{key:'shutouts',label:'SO'},{key:'fantasy_points',label:'FP',hi:true}]
+                  : [{key:'goals',label:'G'},{key:'assists',label:'A'},{key:'points',label:'PTS'},{key:'shots',label:'SOG'},{key:'plus_minus',label:'+/-'},{key:'penalty_minutes',label:'PIM'},{key:'fantasy_points',label:'FP',hi:true}]
+                ).map(c => (
+                  <div key={c.key} style={{ ...styles.th, flex:1, textAlign:'center', color: c.hi ? 'var(--pink)' : 'rgba(255,255,255,0.8)' }}>{c.label}</div>
+                ))}
+              </div>
+              {gameLog.length === 0 ? (
+                <div style={styles.emptyRow}>No individual game stats available for this season</div>
+              ) : (
+                gameLog.map((g, i) => {
+                  const cols = isGoalie
+                    ? [{key:'goals_against'},{key:'saves'},{key:'save_percentage',dec:3},{key:'wins'},{key:'shutouts'},{key:'fantasy_points',hi:true}]
+                    : [{key:'goals'},{key:'assists'},{key:'points'},{key:'shots'},{key:'plus_minus'},{key:'penalty_minutes'},{key:'fantasy_points',hi:true}];
+                  return (
+                    <div key={i} style={{ ...styles.tableRow, background: i%2===0?'transparent':'rgba(255,255,255,0.03)' }}>
+                      <div style={{ ...styles.td, width:'70px', color:'rgba(255,255,255,0.55)', fontSize:'0.78rem' }}>
+                        {g.created_at ? new Date(g.created_at).toLocaleDateString('en-US',{month:'numeric',day:'numeric'}) : '—'}
+                      </div>
+                      {cols.map(c => (
+                        <div key={c.key} style={{ ...styles.td, flex:1, textAlign:'center', color: c.hi ? 'var(--pink)' : 'rgba(255,255,255,0.88)', fontWeight: c.hi ? '700' : '400' }}>
+                          {g[c.key] != null ? (c.dec ? Number(g[c.key]).toFixed(c.dec) : g[c.key]) : '0'}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>

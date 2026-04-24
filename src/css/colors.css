@@ -1,11 +1,62 @@
 :root {
-    --dark-purple: #180157;
-    --violet: #6a00ff;
-    --white: #ffffff;
-    --pink: #FF7CDE;
-    --light-pink: #fea1f4;
-    --link-hover-color: #ffffff;
-    --yellow: #ffc107;
-    --cta-text-color: #333333;
-    --orange: #ff8c00;
+  /* Brand */
+  --dark-purple: #180157;
+  --violet: #6a00ff;
+  --pink: #FF7CDE;
+  --light-pink: #fea1f4;
+  --yellow: #ffc107;
+  --orange: #ff8c00;
+  --white: #ffffff;
+  --link-hover-color: #ffffff;
+  --cta-text-color: #333333;
+
+  /* Semantic surfaces */
+  --surface-1: rgba(255,255,255,0.03);
+  --surface-2: rgba(255,255,255,0.05);
+  --surface-3: rgba(255,255,255,0.08);
+  --border-subtle: rgba(255,255,255,0.07);
+  --border-light:  rgba(255,255,255,0.12);
+  --border-medium: rgba(255,255,255,0.18);
+
+  /* Text */
+  --text-primary:   #ffffff;
+  --text-secondary: rgba(255,255,255,0.80);
+  --text-muted:     rgba(255,255,255,0.55);
+  --text-faint:     rgba(255,255,255,0.35);
+
+  /* Pink tints */
+  --pink-bg:     rgba(255,124,222,0.08);
+  --pink-border: rgba(255,124,222,0.25);
+  --pink-hover:  rgba(255,124,222,0.15);
+
+  /* Status */
+  --status-success: #00c853;
+  --status-warn:    #ffc107;
+  --status-danger:  #ff5252;
+  --status-info:    #60a5fa;
+  --status-success-bg: rgba(0,200,83,0.12);
+  --status-warn-bg:    rgba(255,193,7,0.12);
+  --status-danger-bg:  rgba(255,82,82,0.12);
+  --status-info-bg:    rgba(96,165,250,0.12);
+
+  /* Spacing scale (4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Border radius scale */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+  --shadow-pink: 0 8px 24px rgba(255,124,222,0.2);
 }

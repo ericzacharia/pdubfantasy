@@ -1,5 +1,152 @@
 /* PWHL Fantasy Hockey Styles */
 
+/* ── Cards ────────────────────────────────────────────────── */
+.pwhl-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  transition: all 0.2s ease;
+}
+.pwhl-card:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: var(--border-light);
+}
+.pwhl-card-clickable {
+  cursor: pointer;
+}
+.pwhl-card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-pink);
+  border-color: var(--pink-border);
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.pwhl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.pwhl-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.pwhl-btn-primary { background: linear-gradient(135deg, var(--pink), var(--violet)); color: #fff; }
+.pwhl-btn-secondary { background: var(--surface-3); color: var(--text-secondary); border: 1px solid var(--border-light); }
+.pwhl-btn-danger { background: var(--status-danger-bg); color: var(--status-danger); border: 1px solid rgba(255,82,82,0.3); }
+.pwhl-btn-success { background: var(--status-success-bg); color: var(--status-success); border: 1px solid rgba(0,200,83,0.3); }
+.pwhl-btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border-subtle); }
+.pwhl-btn-icon { padding: 6px 10px; }
+
+/* ── Tags & Badges ────────────────────────────────────────── */
+.pwhl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.pwhl-badge-pink    { background: var(--pink-bg);          color: var(--pink);           border: 1px solid var(--pink-border); }
+.pwhl-badge-success { background: var(--status-success-bg); color: var(--status-success); border: 1px solid rgba(0,200,83,0.3); }
+.pwhl-badge-warn    { background: var(--status-warn-bg);    color: var(--status-warn);    border: 1px solid rgba(255,193,7,0.3); }
+.pwhl-badge-danger  { background: var(--status-danger-bg);  color: var(--status-danger);  border: 1px solid rgba(255,82,82,0.3); }
+.pwhl-badge-info    { background: var(--status-info-bg);    color: var(--status-info);    border: 1px solid rgba(96,165,250,0.3); }
+.pwhl-badge-muted   { background: var(--surface-3);         color: var(--text-muted);     border: 1px solid var(--border-subtle); }
+
+/* Game-today dot */
+.pwhl-dot-live {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--status-success);
+  display: inline-block;
+  flex-shrink: 0;
+}
+.pwhl-dot-live.pulse { animation: pulse 1.5s ease-in-out infinite; }
+
+/* ── Tables ───────────────────────────────────────────────── */
+.pwhl-table { background: var(--surface-1); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); overflow: hidden; }
+.pwhl-table-header { display: flex; padding: 10px 16px; background: var(--surface-1); border-bottom: 1px solid var(--border-subtle); }
+.pwhl-table-header .col { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); padding: 0 4px; }
+.pwhl-table-row { display: flex; padding: 9px 16px; border-bottom: 1px solid rgba(255,255,255,0.03); align-items: center; transition: background 0.12s ease; }
+.pwhl-table-row:nth-child(odd)  { background: transparent; }
+.pwhl-table-row:nth-child(even) { background: var(--surface-1); }
+.pwhl-table-row:hover { background: rgba(255,255,255,0.06) !important; }
+.pwhl-table-row.clickable { cursor: pointer; }
+.pwhl-table-row .cell { font-size: 0.875rem; padding: 0 4px; color: var(--text-secondary); }
+
+/* ── Inputs ───────────────────────────────────────────────── */
+.pwhl-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.pwhl-input:focus { border-color: var(--pink-border); }
+.pwhl-input::placeholder { color: var(--text-faint); }
+
+.pwhl-search-wrap { position: relative; }
+.pwhl-search-wrap .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 0.8rem; pointer-events: none; }
+.pwhl-search-wrap .pwhl-input { padding-left: 34px; }
+
+/* ── Section headings ─────────────────────────────────────── */
+.pwhl-section-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0 0 var(--space-3); display: flex; align-items: center; gap: var(--space-2); }
+.pwhl-section-title .accent { color: var(--pink); }
+
+/* ── Empty state ──────────────────────────────────────────── */
+.pwhl-empty { text-align: center; padding: 3rem var(--space-4); color: var(--text-muted); background: var(--surface-1); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); }
+.pwhl-empty .icon { font-size: 2rem; margin-bottom: var(--space-3); opacity: 0.4; }
+.pwhl-empty .label { font-size: 0.9rem; }
+
+/* ── Back button ──────────────────────────────────────────── */
+.pwhl-back-btn { background: none; border: none; color: var(--text-faint); cursor: pointer; font-size: 0.875rem; padding: 0 0 var(--space-3); display: flex; align-items: center; gap: 6px; font-family: 'Manrope', sans-serif; }
+.pwhl-back-btn:hover { color: var(--text-secondary); }
+
+/* ── Star/watchlist ───────────────────────────────────────── */
+.pwhl-star { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.25); font-size: 0.85rem; padding: 2px 5px; transition: color 0.2s, transform 0.15s; line-height: 1; }
+.pwhl-star:hover { color: var(--yellow); transform: scale(1.2); }
+.pwhl-star.active { color: var(--yellow); }
+
+/* ── Gradient text ────────────────────────────────────────── */
+.pwhl-gradient-text {
+  background: linear-gradient(135deg, var(--pink), var(--violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Loading skeleton ─────────────────────────────────────── */
+@keyframes shimmer { from { background-position: -400px 0; } to { background-position: 400px 0; } }
+.pwhl-skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, rgba(255,255,255,0.06) 50%, var(--surface-2) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Mobile overrides ─────────────────────────────────────── */
+@media (max-width: 640px) {
+  .pwhl-hide-mobile { display: none !important; }
+  .pwhl-stack-mobile { flex-direction: column !important; }
+  .pwhl-full-mobile { width: 100% !important; max-width: 100% !important; }
+}
+
 /* Scrollable table wrapper */
 .pwhl-table-scroll {
   overflow-x: auto;

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PlayerAvatar from '../PlayerAvatar';
-import { pwhlPlayersAPI } from '../../services/pwhlAPI';
+import { useWatchlist } from '../../hooks/useWatchlist';
+import { pwhlPlayersAPI, pwhlFantasyAPI, pwhlLeagueAPI } from '../../services/pwhlAPI';
+import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
 
 const POS_COLORS = { C:'#8b5cf6', LW:'#8b5cf6', RW:'#8b5cf6', F:'#8b5cf6', D:'#3b82f6', G:'#f59e0b' };
 
@@ -41,6 +43,7 @@ const GOALIE_COLS = [
 const POSITIONS = ['All', 'C', 'LW', 'RW', 'D', 'G'];
 const SEASONS = ['2025-2026', '2024-2025', '2024'];
 const QUICK_FILTERS = [
+  { label: '⭐ Watchlist', sortBy: null,           special: 'watchlist' },
   { label: '🏒 Top FP',   sortBy: 'fantasy_value' },
   { label: '🥅 Goals',    sortBy: 'goals' },
   { label: '🎯 Assists',  sortBy: 'assists' },
@@ -49,10 +52,16 @@ const QUICK_FILTERS = [
 
 const PlayersTable = () => {
   const navigate = useNavigate();
-  const [playerType, setPlayerType] = useState('skaters'); // 'skaters' | 'goalies'
+  const { isPwhlAuthenticated } = usePwhlAuth();
+  const { watchlist, toggle: toggleWatch, isWatched } = useWatchlist();
+  const [playerType, setPlayerType] = useState('skaters');
   const [players, setPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [myRosterIds, setMyRosterIds] = useState(new Set());
+  const [gameTodayIds, setGameTodayIds] = useState(new Set());
+  const [perGame, setPerGame] = useState(false);
+  const [showWatchlist, setShowWatchlist] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedTeam, setSelectedTeam] = useState('All');
   const [selectedPosition, setSelectedPosition] = useState('All');
@@ -67,6 +76,32 @@ const PlayersTable = () => {
     pwhlPlayersAPI.getAllTeams()
       .then(r => setTeams(r.data || []))
       .catch(() => {});
+  }, []);
+
+  // Fetch which players are on the user's teams
+  useEffect(() => {
+    if (!isPwhlAuthenticated) return;
+    pwhlFantasyAPI.getMyTeams().then(r => {
+      const ids = new Set();
+      // For each team, we'd need roster — approximate with team data for now
+      setMyRosterIds(ids);
+    }).catch(() => {});
+  }, [isPwhlAuthenticated]);
+
+  // Fetch players with games today
+  useEffect(() => {
+    pwhlLeagueAPI.getUpcomingGames().then(r => {
+      const today = new Date().toDateString();
+      const todayIds = new Set();
+      (r.data || []).forEach(game => {
+        const gameDate = game.game_date ? new Date(game.game_date + 'T00:00:00').toDateString() : null;
+        if (gameDate === today) {
+          if (game.home_team_id) todayIds.add(game.home_team_id);
+          if (game.away_team_id) todayIds.add(game.away_team_id);
+        }
+      });
+      setGameTodayIds(todayIds);
+    }).catch(() => {});
   }, []);
 
   const fetchPlayers = useCallback(async () => {
@@ -158,6 +193,19 @@ const PlayersTable = () => {
 
   const cols = playerType === 'skaters' ? SKATER_COLS : GOALIE_COLS;
   const skaterPositions = POSITIONS.filter(p => p !== 'G');
+  const hasActiveFilters = selectedTeam !== 'All' || selectedPosition !== 'All' || search;
+  const clearFilters = () => { setSearch(''); setSelectedTeam('All'); setSelectedPosition('All'); };
+
+  // Apply watchlist filter
+  const displayPlayers = showWatchlist
+    ? players.filter(p => isWatched(p.id))
+    : players;
+
+  // Per-game conversion
+  const applyPerGame = (val, gp) => {
+    if (!perGame || !gp || gp === 0) return val;
+    return typeof val === 'number' ? (val / gp).toFixed(2) : val;
+  };
 
   return (
     <div>
@@ -165,51 +213,92 @@ const PlayersTable = () => {
       <div className="pwhl-filter-chips" style={{ marginBottom: '10px' }}>
         {QUICK_FILTERS.map(qf => (
           <button
-            key={qf.sortBy}
-            className={`pwhl-chip ${sortBy === qf.sortBy ? 'active' : ''}`}
-            onClick={() => { setSortBy(qf.sortBy); setSortDir('desc'); if (qf.sortBy === 'goals' || qf.sortBy === 'assists' || qf.sortBy === 'points') setPlayerType('skaters'); }}
-          >{qf.label}</button>
+            key={qf.special || qf.sortBy}
+            className={`pwhl-chip ${qf.special === 'watchlist' ? (showWatchlist ? 'active' : '') : (sortBy === qf.sortBy ? 'active' : '')}`}
+            onClick={() => {
+              if (qf.special === 'watchlist') { setShowWatchlist(w => !w); return; }
+              setSortBy(qf.sortBy);
+              setSortDir('desc');
+              if (['goals','assists','points'].includes(qf.sortBy)) setPlayerType('skaters');
+            }}
+            aria-pressed={qf.special === 'watchlist' ? showWatchlist : sortBy === qf.sortBy}
+          >
+            {qf.label}
+            {qf.special === 'watchlist' && watchlist.size > 0 && (
+              <span style={{ marginLeft: '5px', background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0 6px', fontSize: '0.65rem', fontWeight: '700' }}>
+                {watchlist.size}
+              </span>
+            )}
+          </button>
         ))}
       </div>
 
-      {/* Controls */}
-      <div style={styles.controls}>
-        {/* Player type toggle */}
+      {/* Controls row */}
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
+        {/* Skaters/Goalies */}
         <div style={styles.typeToggle}>
           {['skaters', 'goalies'].map(t => (
-            <button
-              key={t}
-              style={{ ...styles.toggleBtn, ...(playerType === t ? styles.toggleBtnActive : {}) }}
-              onClick={() => { setPlayerType(t); setSelectedPosition('All'); }}
-            >
+            <button key={t} style={{ ...styles.toggleBtn, ...(playerType === t ? styles.toggleBtnActive : {}) }}
+              onClick={() => { setPlayerType(t); setSelectedPosition('All'); }}>
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
           ))}
         </div>
 
-        {/* Season selector */}
-        <select
-          value={selectedSeason}
-          onChange={e => setSelectedSeason(e.target.value)}
-          style={styles.select}
+        {/* Per game toggle */}
+        <button
+          style={{ ...styles.toggleBtn, ...(perGame ? styles.toggleBtnActive : {}), padding: '6px 12px', fontSize: '0.8rem' }}
+          onClick={() => setPerGame(p => !p)}
+          title="Toggle between season totals and per-game averages"
         >
+          {perGame ? 'Per Game' : 'Totals'}
+        </button>
+
+        {/* Season */}
+        <select value={selectedSeason} onChange={e => setSelectedSeason(e.target.value)} style={styles.select}>
           {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
+
+        {/* Active filter badges + clear */}
+        {hasActiveFilters && (
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            {selectedTeam !== 'All' && (
+              <span className="pwhl-badge pwhl-badge-pink" style={{ cursor: 'pointer' }} onClick={() => setSelectedTeam('All')}>
+                {selectedTeam} <i className="fas fa-times" style={{ marginLeft: '3px', fontSize: '0.6rem' }} />
+              </span>
+            )}
+            {selectedPosition !== 'All' && (
+              <span className="pwhl-badge pwhl-badge-pink" style={{ cursor: 'pointer' }} onClick={() => setSelectedPosition('All')}>
+                {selectedPosition} <i className="fas fa-times" style={{ marginLeft: '3px', fontSize: '0.6rem' }} />
+              </span>
+            )}
+            <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.78rem', cursor: 'pointer', padding: '2px 6px' }}>
+              Clear all
+            </button>
+          </div>
+        )}
+
+        {/* Results count */}
+        <span style={{ marginLeft: 'auto', fontSize: '0.78rem', color: 'var(--text-faint)' }}>
+          {loading ? '…' : `${displayPlayers.length} players`}
+        </span>
       </div>
 
       {/* Search */}
-      <div style={styles.searchRow}>
-        <div style={styles.searchWrapper}>
-          <i className="fas fa-search" style={styles.searchIcon} />
+      <div style={{ marginBottom: '10px', maxWidth: '360px' }}>
+        <div className="pwhl-search-wrap">
+          <i className="fas fa-search icon" />
           <input
+            className="pwhl-input"
             type="text"
             placeholder="Search players..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={styles.searchInput}
+            aria-label="Search players"
           />
           {search && (
-            <button onClick={() => setSearch('')} style={styles.clearBtn}>
+            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer' }}
+              aria-label="Clear search">
               <i className="fas fa-times" />
             </button>
           )}
@@ -276,12 +365,19 @@ const PlayersTable = () => {
 
             {/* Rows */}
             {loading ? (
-              <div style={styles.loadingRow}>Loading players...</div>
-            ) : players.length === 0 ? (
-              <div style={styles.loadingRow}>No players found</div>
+              <div style={styles.loadingRow}><i className="fas fa-spinner fa-spin" style={{ marginRight: '8px' }} />Loading players...</div>
+            ) : displayPlayers.length === 0 ? (
+              <div className="pwhl-empty">
+                <div className="icon"><i className="fas fa-search" /></div>
+                <div className="label">{showWatchlist ? 'No players in your watchlist yet — star players to save them' : 'No players found — try adjusting your filters'}</div>
+              </div>
             ) : (
-              players.map((player, idx) => (
-                <PlayerRow key={player.id} player={player} cols={cols} getCellValue={getCellValue} idx={idx} navigate={navigate} />
+              displayPlayers.map((player, idx) => (
+                <PlayerRow key={player.id} player={player} cols={cols} getCellValue={getCellValue} idx={idx} navigate={navigate}
+                  isWatched={isWatched(player.id)} onToggleWatch={(e) => { e.stopPropagation(); toggleWatch(player.id); }}
+                  hasGameToday={gameTodayIds.has(player.pwhl_team_id)}
+                  perGame={perGame} applyPerGame={applyPerGame}
+                />
               ))
             )}
           </div>
@@ -314,13 +410,15 @@ const PlayersTable = () => {
   );
 };
 
-const PlayerRow = ({ player, cols, getCellValue, idx, navigate }) => {
+const PlayerRow = ({ player, cols, getCellValue, idx, navigate, isWatched, onToggleWatch, hasGameToday, perGame, applyPerGame }) => {
   const [hovered, setHovered] = useState(false);
+  const gp = player.season_stats?.games_played || 1;
+
   return (
     <div
       style={{
         ...styles.tableRow,
-        background: hovered ? 'rgba(255,255,255,0.05)' : (idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.04)'),
+        background: hovered ? 'rgba(255,255,255,0.06)' : (idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.03)'),
         cursor: 'pointer',
       }}
       onClick={() => navigate(`/player/${player.id}`)}
@@ -335,26 +433,49 @@ const PlayerRow = ({ player, cols, getCellValue, idx, navigate }) => {
             width: col.width,
             minWidth: col.width,
             textAlign: col.key === 'name' ? 'left' : 'center',
-            color: col.key === 'fantasy' ? 'var(--pink)' : col.key === 'name' ? '#fff' : 'rgba(255,255,255,0.92)',
+            color: col.key === 'fantasy' ? 'var(--pink)' : col.key === 'name' ? '#fff' : 'rgba(255,255,255,0.88)',
             fontWeight: col.key === 'fantasy' ? '700' : col.key === 'name' ? '600' : '400',
           }}
         >
           {col.key === 'name' ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-              <PlayerAvatar src={player.headshot_url} name={getCellValue(player, 'name')} position={player.position} size={28} />
-              <div style={{ minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ color: hovered ? 'var(--pink)' : '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                <PlayerAvatar src={player.headshot_url} name={getCellValue(player, 'name')} position={player.position} size={28} />
+                {hasGameToday && (
+                  <span className="pwhl-dot-live" style={{ position: 'absolute', bottom: 0, right: 0, width: '7px', height: '7px', border: '1px solid rgba(0,0,0,0.5)' }} title="Game today" />
+                )}
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ color: hovered ? 'var(--pink)' : '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color 0.15s' }}>
                     {getCellValue(player, 'name')}
                   </span>
                   <PosBadge pos={player.position} />
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginTop: '1px' }}>{player.team_abbreviation}</div>
+                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginTop: '1px' }}>{player.team_abbreviation}</div>
               </div>
-              {hovered && <i className="fas fa-chevron-right" style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--pink)', flexShrink: 0 }} />}
+              {/* Watchlist star — visible on hover or when active */}
+              {(hovered || isWatched) && (
+                <button
+                  className={`pwhl-star ${isWatched ? 'active' : ''}`}
+                  onClick={onToggleWatch}
+                  aria-label={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
+                  title={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
+                >
+                  <i className={isWatched ? 'fas fa-star' : 'far fa-star'} />
+                </button>
+              )}
+              {hovered && !isWatched && <i className="fas fa-chevron-right" style={{ fontSize: '0.65rem', color: 'var(--text-faint)', flexShrink: 0 }} />}
             </div>
-          ) : col.key === 'team' ? null : (  // team column now shown inside name cell
-            getCellValue(player, col.key)
+          ) : col.key === 'team' ? null : (
+            (() => {
+              const raw = getCellValue(player, col.key);
+              if (perGame && col.key !== 'gaa' && col.key !== 'save_pct' && col.key !== 'fantasy' && raw !== '—') {
+                const num = parseFloat(raw);
+                return isNaN(num) ? raw : applyPerGame(num, gp);
+              }
+              return raw;
+            })()
           )}
         </div>
       ))}

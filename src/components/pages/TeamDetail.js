@@ -49,6 +49,18 @@ const TeamDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('roster');
   const [rosterTab, setRosterTab] = useState('skaters');
+  const [sortKey, setSortKey] = useState('fantasy');
+  const [sortDir, setSortDir] = useState('desc');
+
+  const handleSort = (key) => {
+    if (!key || key === 'name' || key === 'position') return;
+    if (sortKey === key) {
+      setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+  };
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -95,15 +107,40 @@ const TeamDetail = () => {
   if (loading) return <div style={s.center}>Loading...</div>;
   if (!team)   return <div style={s.center}>Team "{abbr}" not found.</div>;
 
-  const skaters = roster.filter(p => p.position !== 'G')
-    .sort((a, b) => (b.fantasy_value || 0) - (a.fantasy_value || 0));
-  const goalies = roster.filter(p => p.position === 'G')
-    .sort((a, b) => (b.fantasy_value || 0) - (a.fantasy_value || 0));
+  const sortPlayers = (players) => {
+    const sorted = [...players].sort((a, b) => {
+      const av = getNumericVal(a, sortKey);
+      const bv = getNumericVal(b, sortKey);
+      return sortDir === 'desc' ? bv - av : av - bv;
+    });
+    return sorted;
+  };
+
+  const skaters = sortPlayers(roster.filter(p => p.position !== 'G'));
+  const goalies  = sortPlayers(roster.filter(p => p.position === 'G'));
   const displayRoster = rosterTab === 'skaters' ? skaters : goalies;
   const cols = rosterTab === 'skaters' ? SKATER_COLS : GOALIE_COLS;
 
   const primaryColor = team.primary_color || 'var(--pink)';
   const secondaryColor = team.secondary_color || 'rgba(255,255,255,0.1)';
+
+  const getNumericVal = (player, key) => {
+    const stats = player.season_stats || {};
+    switch (key) {
+      case 'jersey':   return player.jersey_number || 0;
+      case 'gp':       return stats.games_played ?? 0;
+      case 'goals':    return stats.goals ?? 0;
+      case 'assists':  return stats.assists ?? 0;
+      case 'points':   return (stats.goals ?? 0) + (stats.assists ?? 0);
+      case 'shots':    return stats.shots ?? 0;
+      case 'wins':     return stats.wins ?? 0;
+      case 'save_pct': return stats.save_percentage ?? 0;
+      case 'gaa':      return stats.goals_against_average ?? 99;
+      case 'shutouts': return stats.shutouts ?? 0;
+      case 'fantasy':  return player.fantasy_value ?? 0;
+      default:         return 0;
+    }
+  };
 
   const getVal = (player, key) => {
     const stats = player.season_stats || {};
@@ -197,14 +234,30 @@ const TeamDetail = () => {
             <div className="pwhl-table-scroll">
               <div style={{ minWidth: '480px' }}>
                 <div style={s.tableHeader}>
-                  {cols.map((col, i) => (
-                    <div key={col.key} style={{
-                      ...s.th,
-                      ...(col.flex ? { flex: 1, minWidth: '44px' } : { width: col.width, minWidth: col.width }),
-                      textAlign: i === 0 ? 'left' : 'center',
-                      color: col.highlight ? 'var(--pink)' : 'rgba(255,255,255,0.7)',
-                    }}>{col.label}</div>
-                  ))}
+                  {cols.map((col, i) => {
+                    const sortable = col.key !== 'name' && col.key !== 'position';
+                    const isActive = sortKey === col.key;
+                    return (
+                      <div
+                        key={col.key}
+                        style={{
+                          ...s.th,
+                          ...(col.flex ? { flex: 1, minWidth: '44px' } : { width: col.width, minWidth: col.width }),
+                          textAlign: i === 0 ? 'left' : 'center',
+                          color: isActive ? 'var(--pink)' : col.highlight ? 'var(--pink)' : 'rgba(255,255,255,0.7)',
+                          cursor: sortable ? 'pointer' : 'default',
+                          userSelect: 'none',
+                        }}
+                        onClick={() => handleSort(col.key)}
+                      >
+                        {col.label}
+                        {sortable && isActive && (
+                          <i className={`fas fa-caret-${sortDir === 'desc' ? 'down' : 'up'}`}
+                            style={{ marginLeft: '4px', fontSize: '0.65rem' }} />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
                 {displayRoster.length === 0 ? (
                   <div style={s.empty}>

@@ -112,17 +112,17 @@ const StandingsTable = () => {
       {/* Points legend */}
       <div style={styles.legend}>
         {[
-          { key: 'W',   label: 'Regulation Win',   pts: 3,  color: '#00c853' },
-          { key: 'OTW', label: 'Overtime/SO Win',  pts: 2,  color: '#69db7c' },
-          { key: 'OTL', label: 'Overtime/SO Loss',  pts: 1,  color: '#ffc107' },
-          { key: 'L',   label: 'Regulation Loss',   pts: 0,  color: '#ff5252' },
+          { key: 'W',   label: 'Regulation Win',   pts: 3, color: '#00c853' },
+          { key: 'OTW', label: 'Overtime/SO Win',  pts: 2, color: '#69db7c' },
+          { key: 'OTL', label: 'Overtime/SO Loss', pts: 1, color: '#ffc107' },
+          { key: 'L',   label: 'Regulation Loss',  pts: 0, color: '#ff5252' },
         ].map(({ key, label, pts, color }) => (
-          <div key={key} style={styles.legendItem} title={label}>
-            <span style={{ ...styles.legendKey, color }}>{key}</span>
-            <span style={styles.legendPts}>{pts} pt{pts !== 1 ? 's' : ''}</span>
+          <div key={key} title={label} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 10px', background: color + '15', borderRadius: '20px', border: `1px solid ${color}33` }}>
+            <span style={{ fontWeight: '700', color, fontSize: '0.78rem' }}>{key}</span>
+            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem' }}>= {pts}pt{pts !== 1 ? 's' : ''}</span>
           </div>
         ))}
-        <span style={styles.legendNote}>· PTS = total standings points</span>
+        <span style={styles.legendNote}>PTS = total standings points</span>
       </div>
 
       <div style={styles.tableCard}>

@@ -16,7 +16,7 @@ const DRAFT_STATUS_COLOR = {
 };
 
 const LeagueBrowser = () => {
-  const { isPwhlAuthenticated } = usePwhlAuth();
+  const { isPwhlAuthenticated, pwhlUser } = usePwhlAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('my');
   const [myLeagues, setMyLeagues] = useState([]);
@@ -81,9 +81,9 @@ const LeagueBrowser = () => {
       {loading ? (
         <div style={styles.loading}>Loading leagues...</div>
       ) : activeTab === 'my' ? (
-        <MyLeaguesTab leagues={myLeagues} navigate={navigate} />
+        <MyLeaguesTab leagues={myLeagues} navigate={navigate} userId={pwhlUser?.id} />
       ) : (
-        <PublicLeaguesTab leagues={publicLeagues} myLeagues={myLeagues} navigate={navigate} />
+        <PublicLeaguesTab leagues={publicLeagues} myLeagues={myLeagues} navigate={navigate} userId={pwhlUser?.id} />
       )}
 
       {showCreate && <CreateLeagueModal onClose={() => setShowCreate(false)} onCreated={(league) => {
@@ -101,7 +101,7 @@ const LeagueBrowser = () => {
   );
 };
 
-const MyLeaguesTab = ({ leagues, navigate }) => {
+const MyLeaguesTab = ({ leagues, navigate, userId }) => {
   if (leagues.length === 0) {
     return (
       <div style={styles.emptyState}>
@@ -111,12 +111,12 @@ const MyLeaguesTab = ({ leagues, navigate }) => {
   }
   return (
     <div style={styles.leaguesGrid}>
-      {leagues.map(league => <LeagueCard key={league.id} league={league} navigate={navigate} />)}
+      {leagues.map(league => <LeagueCard key={league.id} league={league} navigate={navigate} userId={userId} />)}
     </div>
   );
 };
 
-const PublicLeaguesTab = ({ leagues, myLeagues, navigate }) => {
+const PublicLeaguesTab = ({ leagues, myLeagues, navigate, userId }) => {
   const [search, setSearch] = useState('');
   const myLeagueIds = new Set(myLeagues.map(l => l.id));
   const filtered = leagues.filter(l => l.name?.toLowerCase().includes(search.toLowerCase()));
@@ -138,7 +138,7 @@ const PublicLeaguesTab = ({ leagues, myLeagues, navigate }) => {
       ) : (
         <div style={styles.leaguesGrid}>
           {filtered.map(league => (
-            <LeagueCard key={league.id} league={league} navigate={navigate} isJoined={myLeagueIds.has(league.id)} />
+            <LeagueCard key={league.id} league={league} navigate={navigate} isJoined={myLeagueIds.has(league.id)} userId={userId} />
           ))}
         </div>
       )}
@@ -146,12 +146,12 @@ const PublicLeaguesTab = ({ leagues, myLeagues, navigate }) => {
   );
 };
 
-const LeagueCard = ({ league, navigate, isJoined }) => {
+const LeagueCard = ({ league, navigate, isJoined, userId }) => {
   const [hovered, setHovered] = useState(false);
   const status = league.draft_status || 'pending';
   const statusStyle = DRAFT_STATUS_COLOR[status] || DRAFT_STATUS_COLOR.pending;
   const isDrafting = status === 'in_progress';
-  const openSpots = (league.max_teams || 10) - (league.member_count || 0);
+  const isCommissioner = userId && String(league.commissioner_id) === String(userId);
 
   return (
     <div
@@ -166,7 +166,12 @@ const LeagueCard = ({ league, navigate, isJoined }) => {
     >
       <div style={styles.leagueCardTop}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={styles.leagueName}>{league.name}</div>
+          <div style={styles.leagueName}>
+            {isCommissioner && (
+              <i className="fas fa-crown" title="You are the commissioner" style={{ color: '#ffc107', fontSize: '0.75rem', marginRight: '6px', verticalAlign: 'middle' }} />
+            )}
+            {league.name}
+          </div>
           <div style={styles.leagueMeta}>{league.season} · {league.member_count || 0}/{league.max_teams || 10} teams · {league.draft_type === 'auction' ? 'Auction' : 'Snake'}</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
@@ -174,7 +179,12 @@ const LeagueCard = ({ league, navigate, isJoined }) => {
             {isDrafting && <span className="pwhl-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00c853', display: 'inline-block' }} />}
             {DRAFT_STATUS_LABEL[status] || status}
           </span>
-          {isJoined && (
+          {isCommissioner && (
+            <span style={{ ...styles.statusBadge, background: 'rgba(255,193,7,0.15)', color: '#ffc107', border: '1px solid rgba(255,193,7,0.3)' }}>
+              <i className="fas fa-crown" style={{ marginRight: '4px', fontSize: '0.65rem' }} />Commissioner
+            </span>
+          )}
+          {isJoined && !isCommissioner && (
             <span style={{ ...styles.statusBadge, background: 'rgba(255,124,222,0.15)', color: 'var(--pink)' }}>Joined</span>
           )}
         </div>

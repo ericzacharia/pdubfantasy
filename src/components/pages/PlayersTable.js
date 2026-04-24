@@ -16,28 +16,28 @@ const PosBadge = ({ pos }) => {
   );
 };
 
+// name col fixed, stat cols flex so they expand to fill available space
 const SKATER_COLS = [
-  { key: 'name',        label: 'Player',  sortKey: 'name',          width: '200px', sticky: true },
-  { key: 'gp',          label: 'GP',      sortKey: 'games_played',   width: '50px' },
-  { key: 'goals',       label: 'G',       sortKey: 'goals',          width: '45px' },
-  { key: 'assists',     label: 'A',       sortKey: 'assists',        width: '45px' },
-  { key: 'points',      label: 'PTS',     sortKey: 'points',         width: '50px' },
-  { key: 'plus_minus',  label: '+/-',     sortKey: 'plus_minus',     width: '50px' },
-  { key: 'shots',       label: 'SOG',     sortKey: 'shots',          width: '50px' },
-  { key: 'pim',         label: 'PIM',     sortKey: 'pim',            width: '50px' },
-  { key: 'fantasy',     label: 'FP',      sortKey: 'fantasy_value',  width: '60px' },
+  { key: 'name',        label: 'Player',  sortKey: 'name',          width: '220px', flex: false },
+  { key: 'gp',          label: 'GP',      sortKey: 'games_played',   flex: true },
+  { key: 'goals',       label: 'G',       sortKey: 'goals',          flex: true },
+  { key: 'assists',     label: 'A',       sortKey: 'assists',        flex: true },
+  { key: 'points',      label: 'PTS',     sortKey: 'points',         flex: true },
+  { key: 'plus_minus',  label: '+/-',     sortKey: 'plus_minus',     flex: true },
+  { key: 'shots',       label: 'SOG',     sortKey: 'shots',          flex: true },
+  { key: 'pim',         label: 'PIM',     sortKey: 'pim',            flex: true },
+  { key: 'fantasy',     label: 'FP',      sortKey: 'fantasy_value',  flex: true, highlight: true },
 ];
 
 const GOALIE_COLS = [
-  { key: 'name',        label: 'Player',  sortKey: 'name',          width: '200px', sticky: true },
-  { key: 'team',        label: 'Team',    sortKey: null,             width: '55px' },
-  { key: 'gp',          label: 'GP',      sortKey: 'games_played',   width: '50px' },
-  { key: 'wins',        label: 'W',       sortKey: 'wins',           width: '45px' },
-  { key: 'losses',      label: 'L',       sortKey: 'losses',         width: '45px' },
-  { key: 'save_pct',    label: 'SV%',     sortKey: 'save_pct',       width: '65px' },
-  { key: 'gaa',         label: 'GAA',     sortKey: 'gaa',            width: '60px' },
-  { key: 'shutouts',    label: 'SO',      sortKey: 'shutouts',       width: '50px' },
-  { key: 'fantasy',     label: 'FP',      sortKey: 'fantasy_value',  width: '60px' },
+  { key: 'name',        label: 'Player',  sortKey: 'name',          width: '220px', flex: false },
+  { key: 'gp',          label: 'GP',      sortKey: 'games_played',   flex: true },
+  { key: 'wins',        label: 'W',       sortKey: 'wins',           flex: true },
+  { key: 'losses',      label: 'L',       sortKey: 'losses',         flex: true },
+  { key: 'save_pct',    label: 'SV%',     sortKey: 'save_pct',       flex: true },
+  { key: 'gaa',         label: 'GAA',     sortKey: 'gaa',            flex: true },
+  { key: 'shutouts',    label: 'SO',      sortKey: 'shutouts',       flex: true },
+  { key: 'fantasy',     label: 'FP',      sortKey: 'fantasy_value',  flex: true, highlight: true },
 ];
 
 const POSITIONS = ['All', 'C', 'LW', 'RW', 'D', 'G'];
@@ -336,7 +336,7 @@ const PlayersTable = () => {
       {/* Table */}
       <div style={styles.tableCard}>
         <div className="pwhl-table-scroll">
-          <div style={{ minWidth: cols.reduce((sum, c) => sum + parseInt(c.width), 0) + 'px' }}>
+          <div style={{ minWidth: '480px' }}>
             {/* Header */}
             <div style={styles.tableHeader}>
               {cols.map(col => (
@@ -344,13 +344,13 @@ const PlayersTable = () => {
                   key={col.key}
                   style={{
                     ...styles.th,
-                    width: col.width,
-                    minWidth: col.width,
+                    ...(col.flex ? { flex: 1, minWidth: '44px' } : { width: col.width, minWidth: col.width }),
                     cursor: col.sortKey ? 'pointer' : 'default',
-                    color: sortBy === col.sortKey ? 'var(--pink)' : 'rgba(255,255,255,0.80)',
+                    color: sortBy === col.sortKey ? 'var(--pink)' : col.highlight ? 'var(--pink)' : 'rgba(255,255,255,0.80)',
                     textAlign: col.key === 'name' ? 'left' : 'center',
                   }}
                   onClick={() => handleSort(col.sortKey)}
+                  aria-sort={sortBy === col.sortKey ? (sortDir === 'desc' ? 'descending' : 'ascending') : undefined}
                 >
                   {col.label}
                   {col.sortKey && sortBy === col.sortKey && (
@@ -430,11 +430,10 @@ const PlayerRow = ({ player, cols, getCellValue, idx, navigate, isWatched, onTog
           key={col.key}
           style={{
             ...styles.td,
-            width: col.width,
-            minWidth: col.width,
+            ...(col.flex ? { flex: 1, minWidth: '44px' } : { width: col.width, minWidth: col.width }),
             textAlign: col.key === 'name' ? 'left' : 'center',
-            color: col.key === 'fantasy' ? 'var(--pink)' : col.key === 'name' ? '#fff' : 'rgba(255,255,255,0.88)',
-            fontWeight: col.key === 'fantasy' ? '700' : col.key === 'name' ? '600' : '400',
+            color: col.highlight || col.key === 'fantasy' ? 'var(--pink)' : col.key === 'name' ? '#fff' : 'rgba(255,255,255,0.88)',
+            fontWeight: col.highlight || col.key === 'fantasy' ? '700' : col.key === 'name' ? '600' : '400',
           }}
         >
           {col.key === 'name' ? (

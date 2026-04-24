@@ -118,6 +118,7 @@ const PlayersTable = () => {
         page_size: PAGE_SIZE,
         season: selectedSeason,
         sort_by: sortBy,
+        sort_dir: sortDir,
       };
       if (search) params.q = search;
 
@@ -137,9 +138,6 @@ const PlayersTable = () => {
 
       const res = await pwhlPlayersAPI.getPlayers(params);
       let data = res.data?.players || [];
-
-      // Sort client-side by direction (asc = reverse the DESC result from backend)
-      if (sortDir === 'asc') data = [...data].reverse();
 
       setPlayers(data);
       setTotal(res.data?.total || data.length);

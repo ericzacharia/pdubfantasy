@@ -351,6 +351,27 @@ const PlayersTable = () => {
         </div>
       )}
 
+      {/* FP scoring legend */}
+      <div style={styles.scoringLegend}>
+        <span style={styles.scoringLegendLabel}>FP scoring:</span>
+        {(playerType === 'skaters' ? [
+          { stat: 'Goal',   pts: '+2',   color: '#00c853' },
+          { stat: 'Assist', pts: '+1',   color: '#69db7c' },
+          { stat: 'SOG',    pts: '+0.1', color: '#a3e0b5' },
+        ] : [
+          { stat: 'Win',      pts: '+4',   color: '#60a5fa' },
+          { stat: 'Save',     pts: '+0.2', color: '#93c5fd' },
+          { stat: 'Shutout',  pts: '+3',   color: '#34d399' },
+          { stat: 'OT Loss',  pts: '+1',   color: '#ffc107' },
+          { stat: 'GA',       pts: '−2',   color: '#ff5252' },
+        ]).map(({ stat, pts, color }) => (
+          <div key={stat} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 10px', background: color + '15', borderRadius: '20px', border: `1px solid ${color}33` }}>
+            <span style={{ fontWeight: '700', color, fontSize: '0.78rem' }}>{stat}</span>
+            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem' }}>= {pts}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Table */}
       <div style={styles.tableCard}>
         <div className="pwhl-table-scroll">
@@ -652,6 +673,21 @@ const styles = {
     textAlign: 'center',
     color: 'rgba(255,255,255,0.65)',
     fontSize: '0.9rem',
+  },
+  scoringLegend: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    marginBottom: '10px',
+    flexWrap: 'wrap',
+  },
+  scoringLegendLabel: {
+    fontSize: '0.72rem',
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.35)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    marginRight: '2px',
   },
   pagination: {
     display: 'flex',

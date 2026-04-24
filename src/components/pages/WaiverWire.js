@@ -195,6 +195,7 @@ const WaiverWire = () => {
                 player={player}
                 isFaab={isFaab}
                 onAdd={() => setClaimModal({ player })}
+                navigate={navigate}
               />
             ))
           )}
@@ -216,7 +217,7 @@ const WaiverWire = () => {
   );
 };
 
-const WaiverPlayerRow = ({ player, isFaab, onAdd }) => {
+const WaiverPlayerRow = ({ player, isFaab, onAdd, navigate }) => {
   const [hovered, setHovered] = useState(false);
   const isGoalie = player.position === 'G';
   return (
@@ -225,10 +226,10 @@ const WaiverPlayerRow = ({ player, isFaab, onAdd }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div style={styles.playerInfo}>
+      <div style={{ ...styles.playerInfo, cursor: 'pointer' }} onClick={() => navigate(`/player/${player.id}`)}>
         <PlayerAvatar src={player.headshot_url} name={player.full_name} position={player.position} size={36} />
         <div>
-          <div style={{ fontWeight: '600', color: '#fff' }}>
+          <div style={{ fontWeight: '600', color: hovered ? 'var(--pink)' : '#fff', transition: 'color 0.15s', display: 'flex', alignItems: 'center', gap: '6px' }}>
             {player.full_name}
             <PlayerStatusBadge status={player.status} note={player.status_note} />
           </div>

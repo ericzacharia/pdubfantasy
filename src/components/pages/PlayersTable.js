@@ -3,10 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import PlayerAvatar from '../PlayerAvatar';
 import { pwhlPlayersAPI } from '../../services/pwhlAPI';
 
+const POS_COLORS = { C:'#8b5cf6', LW:'#8b5cf6', RW:'#8b5cf6', F:'#8b5cf6', D:'#3b82f6', G:'#f59e0b' };
+
+const PosBadge = ({ pos }) => {
+  const color = POS_COLORS[pos] || 'rgba(255,255,255,0.3)';
+  return (
+    <span style={{ background: color + '22', color, border: `1px solid ${color}55`, borderRadius: '4px', padding: '1px 5px', fontSize: '0.65rem', fontWeight: '700', flexShrink: 0 }}>
+      {pos}
+    </span>
+  );
+};
+
 const SKATER_COLS = [
-  { key: 'name',        label: 'Player',  sortKey: 'name',          width: '180px', sticky: true },
-  { key: 'team',        label: 'Team',    sortKey: null,             width: '60px' },
-  { key: 'position',    label: 'POS',     sortKey: null,             width: '50px' },
+  { key: 'name',        label: 'Player',  sortKey: 'name',          width: '200px', sticky: true },
+  { key: 'team',        label: 'Team',    sortKey: null,             width: '55px' },
+  { key: 'gp',          label: 'GP',      sortKey: 'games_played',   width: '50px' },
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   width: '50px' },
   { key: 'goals',       label: 'G',       sortKey: 'goals',          width: '45px' },
   { key: 'assists',     label: 'A',       sortKey: 'assists',        width: '45px' },
@@ -18,9 +29,8 @@ const SKATER_COLS = [
 ];
 
 const GOALIE_COLS = [
-  { key: 'name',        label: 'Player',  sortKey: 'name',          width: '180px', sticky: true },
-  { key: 'team',        label: 'Team',    sortKey: null,             width: '60px' },
-  { key: 'position',    label: 'POS',     sortKey: null,             width: '50px' },
+  { key: 'name',        label: 'Player',  sortKey: 'name',          width: '200px', sticky: true },
+  { key: 'team',        label: 'Team',    sortKey: null,             width: '55px' },
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   width: '50px' },
   { key: 'wins',        label: 'W',       sortKey: 'wins',           width: '45px' },
   { key: 'losses',      label: 'L',       sortKey: 'losses',         width: '45px' },
@@ -32,6 +42,12 @@ const GOALIE_COLS = [
 
 const POSITIONS = ['All', 'C', 'LW', 'RW', 'D', 'G'];
 const SEASONS = ['2025-2026', '2024-2025', '2024'];
+const QUICK_FILTERS = [
+  { label: '🏒 Top FP',   sortBy: 'fantasy_value' },
+  { label: '🥅 Goals',    sortBy: 'goals' },
+  { label: '🎯 Assists',  sortBy: 'assists' },
+  { label: '💥 Points',   sortBy: 'points' },
+];
 
 const PlayersTable = () => {
   const navigate = useNavigate();
@@ -147,6 +163,17 @@ const PlayersTable = () => {
 
   return (
     <div>
+      {/* Quick filter chips */}
+      <div className="pwhl-filter-chips" style={{ marginBottom: '10px' }}>
+        {QUICK_FILTERS.map(qf => (
+          <button
+            key={qf.sortBy}
+            className={`pwhl-chip ${sortBy === qf.sortBy ? 'active' : ''}`}
+            onClick={() => { setSortBy(qf.sortBy); setSortDir('desc'); if (qf.sortBy === 'goals' || qf.sortBy === 'assists' || qf.sortBy === 'points') setPlayerType('skaters'); }}
+          >{qf.label}</button>
+        ))}
+      </div>
+
       {/* Controls */}
       <div style={styles.controls}>
         {/* Player type toggle */}
@@ -315,16 +342,20 @@ const PlayerRow = ({ player, cols, getCellValue, idx, navigate }) => {
           }}
         >
           {col.key === 'name' ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <PlayerAvatar
-                src={player.headshot_url}
-                name={getCellValue(player, 'name')}
-                position={player.position}
-                size={28}
-              />
-              <span style={{ color: hovered ? 'var(--pink)' : '#fff' }}>{getCellValue(player, 'name')}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <PlayerAvatar src={player.headshot_url} name={getCellValue(player, 'name')} position={player.position} size={28} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ color: hovered ? 'var(--pink)' : '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {getCellValue(player, 'name')}
+                  </span>
+                  <PosBadge pos={player.position} />
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginTop: '1px' }}>{player.team_abbreviation}</div>
+              </div>
+              {hovered && <i className="fas fa-chevron-right" style={{ marginLeft: 'auto', fontSize: '0.7rem', color: 'var(--pink)', flexShrink: 0 }} />}
             </div>
-          ) : (
+          ) : col.key === 'team' ? null : (  // team column now shown inside name cell
             getCellValue(player, col.key)
           )}
         </div>

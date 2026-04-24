@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import PlayerAvatar from '../PlayerAvatar';
 import { pwhlLeagueAPI } from '../../services/pwhlAPI';
 
 const COLS = [
@@ -15,10 +17,14 @@ const COLS = [
 ];
 
 const StandingsTable = () => {
+  const navigate = useNavigate();
   const [standings, setStandings] = useState([]);
   const [season, setSeason] = useState('2025-2026');
   const [seasons, setSeasons] = useState(['2025-2026', '2024-2025', '2024']);
   const [loading, setLoading] = useState(true);
+  const [rosterTeam, setRosterTeam] = useState(null);
+  const [roster, setRoster] = useState([]);
+  const [rosterLoading, setRosterLoading] = useState(false);
 
   useEffect(() => {
     pwhlLeagueAPI.getStandingSeasons()
@@ -50,6 +56,16 @@ const StandingsTable = () => {
     }
   };
 
+  const openRoster = async (team) => {
+    setRosterTeam(team);
+    setRosterLoading(true);
+    try {
+      const res = await pwhlLeagueAPI.getTeamRoster(team.id);
+      setRoster(res.data || []);
+    } catch { setRoster([]); }
+    finally { setRosterLoading(false); }
+  };
+
   return (
     <div>
       <div style={styles.controls}>
@@ -61,6 +77,37 @@ const StandingsTable = () => {
           {seasons.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
+
+      {/* Team Roster Modal */}
+      {rosterTeam && (
+        <div style={modalStyles.overlay} onClick={() => setRosterTeam(null)}>
+          <div style={modalStyles.card} onClick={e => e.stopPropagation()}>
+            <div style={modalStyles.header}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {rosterTeam.logo_url && <img src={rosterTeam.logo_url} alt="" style={{ width: 36, height: 36, objectFit: 'contain' }} />}
+                <h3 style={{ margin: 0, color: '#fff' }}>{rosterTeam.city} {rosterTeam.name}</h3>
+              </div>
+              <button onClick={() => setRosterTeam(null)} style={modalStyles.closeBtn}><i className="fas fa-times" /></button>
+            </div>
+            {rosterLoading ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>Loading...</div>
+            ) : (
+              <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                {roster.map((p, i) => (
+                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }} onClick={() => { navigate(`/player/${p.id}`); setRosterTeam(null); }}>
+                    <PlayerAvatar src={p.headshot_url} name={`${p.first_name} ${p.last_name}`} position={p.position} size={32} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: '#fff', fontWeight: '500', fontSize: '0.9rem' }}>{p.first_name} {p.last_name}</div>
+                      <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.75rem' }}>#{p.jersey_number} · {p.position}</div>
+                    </div>
+                    <div style={{ color: 'var(--pink)', fontWeight: '700', fontSize: '0.9rem' }}>{(p.fantasy_value || 0).toFixed(1)} FP</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div style={styles.tableCard}>
         <div className="pwhl-table-scroll">
@@ -95,6 +142,7 @@ const StandingsTable = () => {
                   rank={idx}
                   cols={COLS}
                   getCellValue={getCellValue}
+                  onRosterClick={() => openRoster(team)}
                 />
               ))
             )}
@@ -105,14 +153,16 @@ const StandingsTable = () => {
   );
 };
 
-const StandingRow = ({ team, rank, cols, getCellValue }) => {
+const StandingRow = ({ team, rank, cols, getCellValue, onRosterClick }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <div
       style={{
         ...styles.tableRow,
         background: hovered ? 'rgba(255,255,255,0.05)' : 'transparent',
+        cursor: 'pointer',
       }}
+      onClick={onRosterClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -207,6 +257,13 @@ const styles = {
     color: 'rgba(255,255,255,0.65)',
     fontSize: '0.9rem',
   },
+};
+
+const modalStyles = {
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' },
+  card: { background: '#1a0a2e', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', width: '100%', maxWidth: '480px', maxHeight: '85vh', overflowY: 'auto' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)' },
+  closeBtn: { background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '1rem' },
 };
 
 export default StandingsTable;

@@ -192,13 +192,14 @@ const PWHLHome = () => {
                   <img src={article.thumbnail} alt="" style={styles.newsThumbnail} />
                 )}
                 <div style={styles.newsBody}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <span style={{ background: 'rgba(255,124,222,0.15)', color: 'var(--pink)', borderRadius: '10px', padding: '2px 8px', fontSize: '0.68rem', fontWeight: '700' }}>ANALYSIS</span>
+                    <span style={styles.newsDate}>{article.date || new Date(article.published_at).toLocaleDateString()}</span>
+                  </div>
                   <div style={styles.newsTitle}>{article.title}</div>
                   {article.summary && (
                     <div style={styles.newsSummary}>{article.summary}</div>
                   )}
-                  <div style={styles.newsDate}>
-                    {article.date || new Date(article.published_at).toLocaleDateString()}
-                  </div>
                 </div>
               </a>
             ))}
@@ -231,10 +232,11 @@ const PWHLHome = () => {
                   <img src={item.thumbnail} alt="" style={styles.newsThumbnail} />
                 )}
                 <div style={styles.newsBody}>
-                  <div style={styles.newsTitle}>{item.title}</div>
-                  <div style={styles.newsDate}>
-                    {item.date || new Date(item.published_at).toLocaleDateString()}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                    <span style={{ background: 'rgba(96,165,250,0.15)', color: '#60a5fa', borderRadius: '10px', padding: '2px 8px', fontSize: '0.68rem', fontWeight: '700' }}>NEWS</span>
+                    <span style={styles.newsDate}>{item.date || new Date(item.published_at).toLocaleDateString()}</span>
                   </div>
+                  <div style={styles.newsTitle}>{item.title}</div>
                 </div>
               </a>
             ))}

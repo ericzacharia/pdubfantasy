@@ -31,6 +31,7 @@ const TrendsView = () => {
       .finally(() => setLoading(false));
   }, [lastN]);
 
+  const categoryCounts = trends.reduce((acc, t) => { if (t.category) acc[t.category] = (acc[t.category] || 0) + 1; return acc; }, {});
   const categories = ['All', ...new Set(trends.map(t => t.category).filter(Boolean))];
   const filtered = activeCategory === 'All'
     ? trends
@@ -63,7 +64,19 @@ const TrendsView = () => {
             key={cat}
             className={`pwhl-chip ${activeCategory === cat ? 'active' : ''}`}
             onClick={() => setActiveCategory(cat)}
-          >{cat}</button>
+          >
+            {cat}
+            {cat !== 'All' && categoryCounts[cat] && (
+              <span style={{ marginLeft: '5px', background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0 6px', fontSize: '0.65rem', fontWeight: '700' }}>
+                {categoryCounts[cat]}
+              </span>
+            )}
+            {cat === 'All' && (
+              <span style={{ marginLeft: '5px', background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0 6px', fontSize: '0.65rem', fontWeight: '700' }}>
+                {trends.length}
+              </span>
+            )}
+          </button>
         ))}
       </div>
 

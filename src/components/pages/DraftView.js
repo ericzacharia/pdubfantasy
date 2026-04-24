@@ -18,6 +18,8 @@ const DraftView = () => {
   const [message, setMessage] = useState(null);
   const [showBoard, setShowBoard] = useState(false);
 
+  const [leagueTeams, setLeagueTeams] = useState([]);
+
   const fetchDraft = useCallback(async () => {
     try {
       const [draftRes, teamsRes, availRes, myTeamsRes] = await Promise.all([
@@ -28,6 +30,7 @@ const DraftView = () => {
       ]);
       setDraftState(draftRes.data);
       setAvailable(availRes.data || []);
+      setLeagueTeams(teamsRes.data || []);
 
       const mine = (myTeamsRes.data || []).find(t => String(t.league_id) === String(leagueId));
       setMyTeamId(mine?.id || null);
@@ -111,7 +114,9 @@ const DraftView = () => {
                   Your Pick!
                 </span>
               ) : (
-                <span style={{ color: 'rgba(255,255,255,0.80)' }}>Waiting for other team...</span>
+                <span style={{ color: 'rgba(255,255,255,0.80)' }}>
+                  {leagueTeams.find(t => String(t.id) === String(draftState.current_team_id))?.name || 'Other team'} is picking...
+                </span>
               )}
             </div>
           </div>
@@ -217,8 +222,8 @@ const DraftPlayerRow = ({ player, canPick, onPick }) => {
     >
       <div style={styles.playerInfo}>
         <PlayerAvatar src={player.headshot_url} name={player.full_name || `${player.first_name} ${player.last_name}`} position={player.position} size={32} />
-        <div>
-          <div style={{ fontWeight: '600', color: '#fff', fontSize: '0.875rem' }}>{player.full_name || `${player.first_name} ${player.last_name}`}</div>
+        <div style={{ cursor: 'pointer' }} onClick={() => window.open(`/player/${player.id}`, '_blank')}>
+          <div style={{ fontWeight: '600', color: hovered ? 'var(--pink)' : '#fff', fontSize: '0.875rem', transition: 'color 0.15s' }}>{player.full_name || `${player.first_name} ${player.last_name}`}</div>
           <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.65)' }}>{player.position} · {player.team_abbreviation}</div>
         </div>
       </div>

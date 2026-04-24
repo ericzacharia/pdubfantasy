@@ -194,6 +194,8 @@ const PlayersTable = () => {
   };
 
   const cols = playerType === 'skaters' ? SKATER_COLS : GOALIE_COLS;
+  // Build abbreviation → logo_url map from fetched teams
+  const teamLogoMap = teams.reduce((acc, t) => { if (t.abbreviation) acc[t.abbreviation] = t.logo_url; return acc; }, {});
   const skaterPositions = POSITIONS.filter(p => p !== 'G');
   const hasActiveFilters = selectedTeam !== 'All' || selectedPosition !== 'All' || search;
   const clearFilters = () => { setSearch(''); setSelectedTeam('All'); setSelectedPosition('All'); };
@@ -377,6 +379,7 @@ const PlayersTable = () => {
               displayPlayers.map((player, idx) => (
                 <PlayerRow key={player.id} player={player} cols={cols} getCellValue={getCellValue} idx={idx} navigate={navigate}
                   rank={(page - 1) * PAGE_SIZE + idx + 1}
+                  teamLogoMap={teamLogoMap}
                   isWatched={isWatched(player.id)} onToggleWatch={(e) => { e.stopPropagation(); toggleWatch(player.id); }}
                   hasGameToday={gameTodayIds.has(player.pwhl_team_id)}
                   perGame={perGame} applyPerGame={applyPerGame}
@@ -413,7 +416,7 @@ const PlayersTable = () => {
   );
 };
 
-const PlayerRow = ({ player, cols, getCellValue, idx, rank, navigate, isWatched, onToggleWatch, hasGameToday, perGame, applyPerGame }) => {
+const PlayerRow = ({ player, cols, getCellValue, idx, rank, teamLogoMap, navigate, isWatched, onToggleWatch, hasGameToday, perGame, applyPerGame }) => {
   const [hovered, setHovered] = useState(false);
   const gp = player.season_stats?.games_played || 1;
 
@@ -455,10 +458,21 @@ const PlayerRow = ({ player, cols, getCellValue, idx, rank, navigate, isWatched,
                   <PosBadge pos={player.position} />
                 </div>
                 <div
-                  style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', marginTop: '1px', cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px', cursor: 'pointer' }}
                   onClick={e => { e.stopPropagation(); navigate(`/team/${player.team_abbreviation}`); }}
                   title={`View ${player.team_abbreviation} team page`}
-                >{player.team_abbreviation}</div>
+                >
+                  {teamLogoMap?.[player.team_abbreviation] ? (
+                    <img
+                      src={teamLogoMap[player.team_abbreviation]}
+                      alt={player.team_abbreviation}
+                      style={{ width: '14px', height: '14px', objectFit: 'contain', opacity: 0.8 }}
+                      onError={e => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>{player.team_abbreviation}</span>
+                  )}
+                </div>
               </div>
               {/* Watchlist star — visible on hover or when active */}
               {(hovered || isWatched) && (

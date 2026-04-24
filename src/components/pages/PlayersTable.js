@@ -72,7 +72,7 @@ const PlayersTable = () => {
   const [sortDir, setSortDir] = useState('desc');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const PAGE_SIZE = 50;
+  const PAGE_SIZE = 100;
 
   useEffect(() => {
     pwhlPlayersAPI.getAllTeams()

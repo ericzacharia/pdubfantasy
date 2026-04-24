@@ -107,23 +107,10 @@ const TeamDetail = () => {
   if (loading) return <div style={s.center}>Loading...</div>;
   if (!team)   return <div style={s.center}>Team "{abbr}" not found.</div>;
 
-  const sortPlayers = (players) => {
-    const sorted = [...players].sort((a, b) => {
-      const av = getNumericVal(a, sortKey);
-      const bv = getNumericVal(b, sortKey);
-      return sortDir === 'desc' ? bv - av : av - bv;
-    });
-    return sorted;
-  };
-
-  const skaters = sortPlayers(roster.filter(p => p.position !== 'G'));
-  const goalies  = sortPlayers(roster.filter(p => p.position === 'G'));
-  const displayRoster = rosterTab === 'skaters' ? skaters : goalies;
-  const cols = rosterTab === 'skaters' ? SKATER_COLS : GOALIE_COLS;
-
   const primaryColor = team.primary_color || 'var(--pink)';
   const secondaryColor = team.secondary_color || 'rgba(255,255,255,0.1)';
 
+  // Must be declared before sortPlayers which calls it
   const getNumericVal = (player, key) => {
     const stats = player.season_stats || {};
     switch (key) {
@@ -141,6 +128,20 @@ const TeamDetail = () => {
       default:         return 0;
     }
   };
+
+  const sortPlayers = (players) => {
+    const sorted = [...players].sort((a, b) => {
+      const av = getNumericVal(a, sortKey);
+      const bv = getNumericVal(b, sortKey);
+      return sortDir === 'desc' ? bv - av : av - bv;
+    });
+    return sorted;
+  };
+
+  const skaters = sortPlayers(roster.filter(p => p.position !== 'G'));
+  const goalies  = sortPlayers(roster.filter(p => p.position === 'G'));
+  const displayRoster = rosterTab === 'skaters' ? skaters : goalies;
+  const cols = rosterTab === 'skaters' ? SKATER_COLS : GOALIE_COLS;
 
   const getVal = (player, key) => {
     const stats = player.season_stats || {};

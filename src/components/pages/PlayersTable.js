@@ -473,23 +473,26 @@ const PlayerRow = ({ player, cols, getCellValue, idx, rank, teamLogoMap, navigat
                   <span style={{ color: hovered ? 'var(--pink)' : '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color 0.15s' }}>
                     {getCellValue(player, 'name')}
                   </span>
-                  <PosBadge pos={player.position} />
                 </div>
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px', cursor: 'pointer' }}
-                  onClick={e => { e.stopPropagation(); navigate(`/team/${player.team_abbreviation}`); }}
-                  title={`View ${player.team_abbreviation} team page`}
-                >
-                  {teamLogoMap?.[player.team_abbreviation] ? (
-                    <img
-                      src={teamLogoMap[player.team_abbreviation]}
-                      alt={player.team_abbreviation}
-                      style={{ width: '14px', height: '14px', objectFit: 'contain', opacity: 0.8 }}
-                      onError={e => { e.target.style.display = 'none'; }}
-                    />
-                  ) : (
-                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>{player.team_abbreviation}</span>
-                  )}
+                {/* Team logo + position badge on second line */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
+                  <div
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                    onClick={e => { e.stopPropagation(); navigate(`/team/${player.team_abbreviation}`); }}
+                    title={`View ${player.team_abbreviation} team page`}
+                  >
+                    {teamLogoMap?.[player.team_abbreviation] ? (
+                      <img
+                        src={teamLogoMap[player.team_abbreviation]}
+                        alt={player.team_abbreviation}
+                        style={{ width: '14px', height: '14px', objectFit: 'contain', opacity: 0.75 }}
+                        onError={e => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>{player.team_abbreviation}</span>
+                    )}
+                  </div>
+                  <PosBadge pos={player.position} />
                 </div>
               </div>
               {/* Watchlist star — visible on hover or when active */}

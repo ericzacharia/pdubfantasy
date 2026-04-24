@@ -46,7 +46,7 @@ const GOALIE_COLS = [
   { key: 'fantasy',     label: 'FP',      sortKey: 'fantasy_value',  flex: true, highlight: true },
 ];
 
-const POSITIONS = ['All', 'C', 'LW', 'RW', 'D', 'G'];
+const POSITIONS = ['All', 'F', 'D', 'G'];
 const SEASONS = ['2025-2026', '2024-2025', '2024'];
 const QUICK_FILTERS = [
   { label: '⭐ Watchlist', sortBy: null,           special: 'watchlist' },
@@ -131,7 +131,7 @@ const PlayersTable = () => {
         params.position = selectedPosition;
       } else {
         // All skaters: exclude goalies via comma-separated list
-        params.position = 'F,LW,RW,C,D';
+        params.position = 'F,D';
       }
       if (selectedTeam !== 'All') {
         const team = teams.find(t => t.abbreviation === selectedTeam);
@@ -204,7 +204,7 @@ const PlayersTable = () => {
   const cols = playerType === 'skaters' ? SKATER_COLS : GOALIE_COLS;
   // Build abbreviation → logo_url map from fetched teams
   const teamLogoMap = teams.reduce((acc, t) => { if (t.abbreviation) acc[t.abbreviation] = t.logo_url; return acc; }, {});
-  const skaterPositions = POSITIONS.filter(p => p !== 'G');
+  const skaterPositions = ['All', 'F', 'D'];
   const hasActiveFilters = selectedTeam !== 'All' || selectedPosition !== 'All' || search;
   const clearFilters = () => { setSearch(''); setSelectedTeam('All'); setSelectedPosition('All'); };
 

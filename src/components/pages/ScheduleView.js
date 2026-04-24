@@ -21,7 +21,7 @@ const ScheduleView = () => {
       try {
         const [upRes, resRes, teamsRes] = await Promise.all([
           pwhlLeagueAPI.getUpcomingGames().catch(() => ({ data: [] })),
-          pwhlLeagueAPI.getGames({ status: 'final', limit: 50 }).catch(() => ({ data: [] })),
+          pwhlLeagueAPI.getGames({ status: 'final', limit: 200, from_date: '2025-10-01' }).catch(() => ({ data: [] })),
           pwhlPlayersAPI.getAllTeams().catch(() => ({ data: [] })),
         ]);
 

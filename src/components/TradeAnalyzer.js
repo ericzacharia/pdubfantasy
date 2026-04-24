@@ -132,14 +132,14 @@ const TradeAnalyzer = ({ onClose }) => {
               const v2 = getStatVal(player2, stat.key);
               return (
                 <div key={stat.key} style={styles.statRow}>
-                  <div style={{ ...styles.statVal, textAlign: 'right', color: winner === 'a' ? 'var(--pink)' : '#fff', fontWeight: winner === 'a' ? '700' : '400' }}>
+                  <div style={{ ...styles.statVal, justifyContent: 'flex-end', color: winner === 'a' ? 'var(--pink)' : '#fff', fontWeight: winner === 'a' ? '700' : '400' }}>
+                    {winner === 'a' && <i className="fas fa-caret-right" style={{ marginRight: '5px', color: 'var(--pink)' }} />}
                     {formatVal(v1, stat.decimals)}
-                    {winner === 'a' && <i className="fas fa-caret-left" style={{ marginLeft: '5px', color: 'var(--pink)' }} />}
                   </div>
                   <div style={styles.statLabel}>{stat.label}</div>
-                  <div style={{ ...styles.statVal, textAlign: 'left', color: winner === 'b' ? 'var(--pink)' : '#fff', fontWeight: winner === 'b' ? '700' : '400' }}>
-                    {winner === 'b' && <i className="fas fa-caret-right" style={{ marginRight: '5px', color: 'var(--pink)' }} />}
+                  <div style={{ ...styles.statVal, justifyContent: 'flex-start', color: winner === 'b' ? 'var(--pink)' : '#fff', fontWeight: winner === 'b' ? '700' : '400' }}>
                     {formatVal(v2, stat.decimals)}
+                    {winner === 'b' && <i className="fas fa-caret-left" style={{ marginLeft: '5px', color: 'var(--pink)' }} />}
                   </div>
                 </div>
               );

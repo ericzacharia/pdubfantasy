@@ -173,6 +173,14 @@ export const pwhlFantasyAPI = {
     pwhlApi.get(`/leagues/${leagueId}/draft`),
   startDraft: (leagueId) =>
     pwhlApi.post(`/leagues/${leagueId}/draft/start`),
+
+  // Admin CPU draft simulation
+  cpuPick: (leagueId, sigma = 8) =>
+    pwhlApi.post(`/leagues/${leagueId}/draft/cpu-pick?sigma=${sigma}`),
+  cpuPicksUntilMine: (leagueId, sigma = 8) =>
+    pwhlApi.post(`/leagues/${leagueId}/draft/cpu-picks-until-mine?sigma=${sigma}`),
+  cpuComplete: (leagueId, sigma = 8) =>
+    pwhlApi.post(`/leagues/${leagueId}/draft/cpu-complete?sigma=${sigma}`),
   makeDraftPick: (leagueId, player_id) =>
     pwhlApi.post(`/leagues/${leagueId}/draft/pick`, { player_id }),
   getAvailablePlayers: (leagueId, params = {}) =>

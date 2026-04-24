@@ -7,12 +7,16 @@ import PlayerAvatar from '../PlayerAvatar';
 const DraftView = () => {
   const { leagueId } = useParams();
   const navigate = useNavigate();
-  const { isPwhlAuthenticated } = usePwhlAuth();
+  const { isPwhlAuthenticated, pwhlUser } = usePwhlAuth();
+  const isAdmin = pwhlUser?.is_admin === true;
   const [draftState, setDraftState] = useState(null);
   const [available, setAvailable] = useState([]);
   const [myTeamId, setMyTeamId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [picking, setPicking] = useState(false);
+  const [simulating, setSimulating] = useState(false);
+  const [simLog, setSimLog] = useState([]);
+  const [sigma, setSigma] = useState(8);
   const [search, setSearch] = useState('');
   const [posFilter, setPosFilter] = useState('All');
   const [message, setMessage] = useState(null);
@@ -68,6 +72,59 @@ const DraftView = () => {
   const showMsg = (type, text) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 3500);
+  };
+
+  const runCpuPick = async () => {
+    setSimulating(true);
+    try {
+      const res = await pwhlFantasyAPI.cpuPick(leagueId, sigma);
+      const d = res.data;
+      if (d.picks?.length) {
+        setSimLog(prev => [...d.picks.map(p => `Pick #${p.pick_number}: ${p.team_name} → ${p.player_name}`), ...prev].slice(0, 30));
+      } else if (d.player_name) {
+        setSimLog(prev => [`Pick #${d.pick_number}: ${d.team_name} → ${d.player_name}`, ...prev].slice(0, 30));
+      }
+      await fetchDraft();
+      if (d.your_turn) showMsg('success', "Your turn to pick!");
+      if (d.done) showMsg('success', "Draft complete!");
+    } catch (err) {
+      showMsg('error', err.response?.data?.detail || 'Simulation error');
+    } finally {
+      setSimulating(false);
+    }
+  };
+
+  const runUntilMyTurn = async () => {
+    setSimulating(true);
+    try {
+      const res = await pwhlFantasyAPI.cpuPicksUntilMine(leagueId, sigma);
+      const d = res.data;
+      if (d.picks?.length) {
+        setSimLog(prev => [...d.picks.map(p => `Pick #${p.pick_number}: ${p.team_name} → ${p.player_name}`), ...prev].slice(0, 30));
+      }
+      await fetchDraft();
+      if (d.your_turn) showMsg('success', `Your turn! ${d.picks?.length || 0} CPU picks made.`);
+      if (d.done) showMsg('success', "Draft complete!");
+    } catch (err) {
+      showMsg('error', err.response?.data?.detail || 'Simulation error');
+    } finally {
+      setSimulating(false);
+    }
+  };
+
+  const runComplete = async () => {
+    if (!window.confirm('Auto-complete the entire remaining draft? This will make picks for ALL teams including yours.')) return;
+    setSimulating(true);
+    try {
+      const res = await pwhlFantasyAPI.cpuComplete(leagueId, sigma);
+      const d = res.data;
+      showMsg('success', d.message);
+      await fetchDraft();
+    } catch (err) {
+      showMsg('error', err.response?.data?.detail || 'Simulation error');
+    } finally {
+      setSimulating(false);
+    }
   };
 
   const isMyTurn = draftState?.current_team_id && String(draftState.current_team_id) === String(myTeamId);
@@ -126,6 +183,52 @@ const DraftView = () => {
       {message && (
         <div style={{ ...styles.msgBanner, background: message.type === 'success' ? 'rgba(0,200,83,0.12)' : 'rgba(255,82,82,0.12)', borderColor: message.type === 'success' ? 'rgba(0,200,83,0.3)' : 'rgba(255,82,82,0.3)', color: message.type === 'success' ? '#00c853' : '#ff5252' }}>
           {message.text}
+        </div>
+      )}
+
+      {/* ── Admin CPU Simulator ── */}
+      {isAdmin && draftState.status === 'in_progress' && (
+        <div style={simStyles.panel}>
+          <div style={simStyles.header}>
+            <span style={simStyles.title}>
+              <i className="fas fa-robot" style={{ marginRight: '8px', color: '#ffc107' }} />
+              Admin: CPU Draft Simulator
+            </span>
+            <div style={simStyles.sigmaRow}>
+              <span style={simStyles.sigmaLabel}>Randomness:</span>
+              <input
+                type="range" min={0} max={25} step={1} value={sigma}
+                onChange={e => setSigma(Number(e.target.value))}
+                style={{ width: '100px', accentColor: '#ffc107' }}
+              />
+              <span style={simStyles.sigmaVal}>σ={sigma} {sigma < 4 ? '(predictable)' : sigma > 15 ? '(chaotic)' : '(realistic)'}</span>
+            </div>
+          </div>
+          <div style={simStyles.btnRow}>
+            <button style={{ ...simStyles.btn, opacity: simulating ? 0.5 : 1 }} disabled={simulating || isMyTurn} onClick={runCpuPick}>
+              <i className="fas fa-step-forward" style={{ marginRight: '6px' }} />One CPU Pick
+            </button>
+            <button style={{ ...simStyles.btn, background: 'rgba(255,193,7,0.2)', borderColor: 'rgba(255,193,7,0.4)', color: '#ffc107', opacity: simulating ? 0.5 : 1 }} disabled={simulating} onClick={runUntilMyTurn}>
+              <i className="fas fa-fast-forward" style={{ marginRight: '6px' }} />CPU Until My Turn
+            </button>
+            <button style={{ ...simStyles.btn, background: 'rgba(255,82,82,0.15)', borderColor: 'rgba(255,82,82,0.3)', color: '#ff5252', opacity: simulating ? 0.5 : 1 }} disabled={simulating} onClick={runComplete}>
+              <i className="fas fa-flag-checkered" style={{ marginRight: '6px' }} />Auto-Complete Draft
+            </button>
+          </div>
+          {simLog.length > 0 && (
+            <div style={simStyles.log}>
+              {simLog.map((entry, i) => (
+                <div key={i} style={{ fontSize: '0.78rem', color: i === 0 ? '#ffc107' : 'rgba(255,255,255,0.5)', padding: '2px 0' }}>
+                  {entry}
+                </div>
+              ))}
+            </div>
+          )}
+          {simulating && (
+            <div style={{ fontSize: '0.8rem', color: '#ffc107', marginTop: '8px' }}>
+              <i className="fas fa-spinner fa-spin" style={{ marginRight: '6px' }} />Simulating picks...
+            </div>
+          )}
         </div>
       )}
 
@@ -279,6 +382,18 @@ const styles = {
   pickRow: { display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' },
   boardRow: { display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' },
   toggleBoardBtn: { background: 'none', border: 'none', color: 'rgba(255,255,255,0.80)', cursor: 'pointer', fontSize: '0.82rem', padding: '0 0 10px', display: 'flex', alignItems: 'center', width: '100%' },
+};
+
+const simStyles = {
+  panel: { background: 'rgba(255,193,7,0.05)', border: '1px solid rgba(255,193,7,0.2)', borderRadius: '12px', padding: '14px 16px', marginBottom: '1.5rem' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' },
+  title: { fontSize: '0.9rem', fontWeight: '700', color: '#ffc107', display: 'flex', alignItems: 'center' },
+  sigmaRow: { display: 'flex', alignItems: 'center', gap: '8px' },
+  sigmaLabel: { fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)' },
+  sigmaVal: { fontSize: '0.78rem', color: 'rgba(255,255,255,0.6)', minWidth: '110px' },
+  btnRow: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
+  btn: { background: 'rgba(255,193,7,0.1)', border: '1px solid rgba(255,193,7,0.3)', color: '#ffc107', padding: '7px 14px', borderRadius: '7px', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.2s' },
+  log: { marginTop: '10px', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', padding: '8px 10px', maxHeight: '100px', overflowY: 'auto' },
 };
 
 export default DraftView;

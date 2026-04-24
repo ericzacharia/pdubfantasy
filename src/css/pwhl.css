@@ -116,7 +116,7 @@ select option {
   transition: border-color 0.2s;
 }
 .pwhl-input:focus { border-color: var(--pink-border); }
-.pwhl-input::placeholder { color: var(--text-faint); }
+.pwhl-input::placeholder { color: rgba(255,255,255,0.45); }
 
 .pwhl-search-wrap { position: relative; }
 .pwhl-search-wrap .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 0.8rem; pointer-events: none; }

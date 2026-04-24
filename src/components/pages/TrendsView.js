@@ -104,27 +104,27 @@ const TrendsView = () => {
       {/* Team + player search */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
         <div className="pwhl-search-wrap" style={{ flex: 1, minWidth: '160px', maxWidth: '240px' }}>
-          <i className="fas fa-shield-alt icon" />
+          <i className="fas fa-shield-alt icon" style={{ color: 'rgba(255,255,255,0.55)' }} />
           <input
             className="pwhl-input"
             type="text"
-            placeholder="Filter by team..."
+            placeholder="Team (e.g. BOS)"
             value={teamSearch}
             onChange={e => setTeamSearch(e.target.value)}
             aria-label="Filter by team"
-            style={{ paddingLeft: '34px' }}
+            style={{ paddingLeft: '34px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
           />
         </div>
         <div className="pwhl-search-wrap" style={{ flex: 1, minWidth: '160px', maxWidth: '240px' }}>
-          <i className="fas fa-user icon" />
+          <i className="fas fa-user icon" style={{ color: 'rgba(255,255,255,0.55)' }} />
           <input
             className="pwhl-input"
             type="text"
-            placeholder="Filter by player..."
+            placeholder="Player name"
             value={playerSearch}
             onChange={e => setPlayerSearch(e.target.value)}
             aria-label="Filter by player"
-            style={{ paddingLeft: '34px' }}
+            style={{ paddingLeft: '34px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
           />
         </div>
         {hasFilters && (

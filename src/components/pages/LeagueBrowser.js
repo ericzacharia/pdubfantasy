@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
 import { pwhlFantasyAPI } from '../../services/pwhlAPI';
+import PaymentPrompt from '../PaymentPrompt';
 
 const DRAFT_STATUS_LABEL = {
   pending: 'Setup',
@@ -273,6 +274,11 @@ const LeagueCard = ({ league, navigate, isJoined, userId }) => {
           {isJoined && !isCommissioner && (
             <span style={{ ...styles.statusBadge, background: 'rgba(255,124,222,0.15)', color: 'var(--pink)' }}>Joined</span>
           )}
+          {league.payment_required && league.entry_fee && (
+            <span style={{ ...styles.statusBadge, background: 'rgba(255,193,7,0.12)', color: '#ffc107', border: '1px solid rgba(255,193,7,0.25)' }}>
+              <i className="fas fa-lock" style={{ marginRight: '4px', fontSize: '0.6rem' }} />${Number(league.entry_fee).toFixed(0)} Entry
+            </span>
+          )}
         </div>
       </div>
 
@@ -359,6 +365,7 @@ const JoinLeagueModal = ({ onClose, onJoined }) => {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [joinedLeague, setJoinedLeague] = useState(null);
 
   const handleJoin = async () => {
     if (!code.trim()) { setError('Enter an invite code'); return; }
@@ -366,13 +373,37 @@ const JoinLeagueModal = ({ onClose, onJoined }) => {
     setError('');
     try {
       const res = await pwhlFantasyAPI.joinLeague(code.trim().toUpperCase());
-      onJoined(res.data);
+      if (res.data.payment_required) {
+        // Show payment prompt before navigating
+        setJoinedLeague(res.data);
+      } else {
+        onJoined(res.data);
+      }
     } catch (err) {
       setError(err.response?.data?.detail || 'Invalid invite code');
     } finally {
       setLoading(false);
     }
   };
+
+  // After join: payment required — show the prompt
+  if (joinedLeague) {
+    return (
+      <Modal title="Payment Required" onClose={() => onJoined(joinedLeague)}>
+        <PaymentPrompt
+          league={joinedLeague}
+          leagueId={joinedLeague.id}
+          onConfirmed={() => onJoined(joinedLeague)}
+        />
+        <button
+          style={{ width: '100%', marginTop: '10px', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.82rem', padding: '8px' }}
+          onClick={() => onJoined(joinedLeague)}
+        >
+          I'll pay later
+        </button>
+      </Modal>
+    );
+  }
 
   return (
     <Modal title="Join League" onClose={onClose}>
@@ -385,6 +416,7 @@ const JoinLeagueModal = ({ onClose, onJoined }) => {
           style={styles.input}
           placeholder="e.g. PWHL-XXXX"
           onKeyDown={e => e.key === 'Enter' && handleJoin()}
+          autoFocus
         />
       </div>
       <button style={{ ...styles.primaryBtn, width: '100%', opacity: loading ? 0.6 : 1 }} onClick={handleJoin} disabled={loading}>

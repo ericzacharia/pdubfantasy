@@ -145,6 +145,12 @@ export const pwhlFantasyAPI = {
     pwhlApi.get(`/leagues/${id}/scoring`),
   updateScoringSettings: (id, data) =>
     pwhlApi.put(`/leagues/${id}/scoring`, data),
+  updatePaymentSettings: (id, data) =>
+    pwhlApi.put(`/leagues/${id}/payment`, null, { params: data }),
+  confirmPayment: (id) =>
+    pwhlApi.post(`/leagues/${id}/members/confirm-payment`),
+  getLeagueMembers: (id) =>
+    pwhlApi.get(`/leagues/${id}/members`),
 
   // Fantasy Teams
   getMyTeams: () =>

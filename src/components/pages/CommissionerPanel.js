@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
 import { pwhlFantasyAPI } from '../../services/pwhlAPI';
+import PaymentPrompt from '../PaymentPrompt';
 
 const CommissionerPanel = () => {
   const { leagueId } = useParams();
@@ -14,19 +15,37 @@ const CommissionerPanel = () => {
   const [message, setMessage] = useState(null);
   const [scoringEdits, setScoringEdits] = useState({});
   const [activeTab, setActiveTab] = useState('league');
+  const [members, setMembers] = useState([]);
+  const [paymentEdits, setPaymentEdits] = useState({
+    entry_fee: '', payment_required: false,
+    payment_venmo: '', payment_cashapp: '', payment_paypal: '',
+    payment_other: '', payment_instructions: '',
+  });
 
   useEffect(() => {
     if (!isPwhlAuthenticated) return;
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [leagueRes, scoringRes] = await Promise.all([
+        const [leagueRes, scoringRes, membersRes] = await Promise.all([
           pwhlFantasyAPI.getLeague(leagueId),
           pwhlFantasyAPI.getScoringSettings(leagueId).catch(() => ({ data: null })),
+          pwhlFantasyAPI.getLeagueMembers(leagueId).catch(() => ({ data: [] })),
         ]);
         setLeague(leagueRes.data);
         setScoring(scoringRes.data);
+        setMembers(membersRes.data || []);
         if (scoringRes.data) setScoringEdits(scoringRes.data);
+        const l = leagueRes.data;
+        if (l) setPaymentEdits({
+          entry_fee: l.entry_fee || '',
+          payment_required: l.payment_required || false,
+          payment_venmo: l.payment_venmo || '',
+          payment_cashapp: l.payment_cashapp || '',
+          payment_paypal: l.payment_paypal || '',
+          payment_other: l.payment_other || '',
+          payment_instructions: l.payment_instructions || '',
+        });
       } catch (err) {
         console.error(err);
       } finally {
@@ -84,6 +103,23 @@ const CommissionerPanel = () => {
     }
   };
 
+  const savePayment = async () => {
+    setSaving(true);
+    try {
+      await pwhlFantasyAPI.updatePaymentSettings(leagueId, {
+        ...paymentEdits,
+        entry_fee: paymentEdits.entry_fee || null,
+        payment_required: paymentEdits.payment_required,
+      });
+      showMsg('success', 'Payment settings saved!');
+    } catch (err) {
+      showMsg('error', err.response?.data?.detail || 'Failed to save');
+    } finally { setSaving(false); }
+  };
+
+  const confirmedCount = members.filter(m => m.payment_confirmed).length;
+  const paidCount = members.filter(m => m.payment_confirmed && m.role !== 'commissioner').length;
+
   if (!isPwhlAuthenticated) return <div style={styles.center}>Sign in to access commissioner tools.</div>;
   if (loading) return <div style={styles.center}>Loading...</div>;
   if (!isCommissioner) return <div style={styles.center}>Commissioner access required.</div>;
@@ -127,7 +163,7 @@ const CommissionerPanel = () => {
       )}
 
       <div style={styles.tabs}>
-        {[['league', 'League'], ['scoring', 'Scoring'], ['actions', 'Actions']].map(([id, label]) => (
+        {[['league', 'League'], ['scoring', 'Scoring'], ['payment', `💰 Entry Fee${league?.payment_required ? ' ✓' : ''}`], ['members', `Members (${members.length})`], ['actions', 'Actions']].map(([id, label]) => (
           <button
             key={id}
             style={{ ...styles.tab, ...(activeTab === id ? styles.tabActive : {}) }}
@@ -203,6 +239,118 @@ const CommissionerPanel = () => {
           >
             <i className="fas fa-save" style={{ marginRight: '8px' }} />{saving ? 'Saving...' : 'Save Scoring Settings'}
           </button>
+        </div>
+      )}
+
+      {/* Payment / Entry Fee */}
+      {activeTab === 'payment' && (
+        <div>
+          <div style={styles.section}>
+            {/* Enable/disable toggle */}
+            <div style={styles.settingRow}>
+              <div>
+                <span style={styles.settingLabel}>Require Entry Fee</span>
+                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', marginTop: '2px' }}>
+                  Members must confirm payment before the draft
+                </div>
+              </div>
+              <button
+                style={{ ...styles.toggleBtn, background: paymentEdits.payment_required ? 'rgba(0,200,83,0.15)' : 'rgba(255,255,255,0.08)', color: paymentEdits.payment_required ? '#00c853' : 'rgba(255,255,255,0.6)' }}
+                onClick={() => setPaymentEdits(p => ({ ...p, payment_required: !p.payment_required }))}
+              >
+                {paymentEdits.payment_required ? 'On' : 'Off'}
+              </button>
+            </div>
+
+            {paymentEdits.payment_required && (<>
+              {/* Entry fee amount */}
+              <div style={styles.settingRow}>
+                <span style={styles.settingLabel}>Entry Fee ($)</span>
+                <input type="number" min="0" step="1" value={paymentEdits.entry_fee}
+                  onChange={e => setPaymentEdits(p => ({ ...p, entry_fee: e.target.value }))}
+                  style={{ ...styles.numInput, width: '90px' }} placeholder="20" />
+              </div>
+
+              {/* Payment handles */}
+              {[
+                { field: 'payment_venmo',   label: 'Venmo',   placeholder: '@YourHandle' },
+                { field: 'payment_cashapp', label: 'Cash App', placeholder: '$YourHandle' },
+                { field: 'payment_paypal',  label: 'PayPal',  placeholder: 'paypal.me/you or email' },
+                { field: 'payment_other',   label: 'Other',   placeholder: 'Zelle phone, Apple Pay, etc.' },
+              ].map(({ field, label, placeholder }) => (
+                <div key={field} style={styles.settingRow}>
+                  <span style={styles.settingLabel}>{label}</span>
+                  <input type="text" value={paymentEdits[field]}
+                    onChange={e => setPaymentEdits(p => ({ ...p, [field]: e.target.value }))}
+                    style={{ ...styles.numInput, width: '200px' }} placeholder={placeholder} />
+                </div>
+              ))}
+
+              {/* Instructions */}
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ ...styles.settingLabel, marginBottom: '6px' }}>Instructions for players</div>
+                <textarea
+                  value={paymentEdits.payment_instructions}
+                  onChange={e => setPaymentEdits(p => ({ ...p, payment_instructions: e.target.value }))}
+                  rows={3}
+                  placeholder="e.g. Send $20 with note 'Fantasy League - [Your Name]' before the draft starts."
+                  style={{ ...styles.numInput, width: '100%', resize: 'vertical', fontFamily: 'Manrope, sans-serif', fontSize: '0.875rem', lineHeight: '1.5' }}
+                />
+              </div>
+            </>)}
+          </div>
+
+          <button style={{ ...styles.primaryBtn, opacity: saving ? 0.6 : 1 }} onClick={savePayment} disabled={saving}>
+            <i className="fas fa-save" style={{ marginRight: '8px' }} />{saving ? 'Saving...' : 'Save Payment Settings'}
+          </button>
+
+          {/* Preview */}
+          {paymentEdits.payment_required && (paymentEdits.payment_venmo || paymentEdits.payment_cashapp || paymentEdits.payment_paypal || paymentEdits.payment_other) && (
+            <div style={{ marginTop: '1.5rem', background: 'rgba(255,193,7,0.06)', border: '1px solid rgba(255,193,7,0.2)', borderRadius: '12px', padding: '16px' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: '700', textTransform: 'uppercase', color: '#ffc107', marginBottom: '10px', letterSpacing: '0.06em' }}>
+                Preview — what members see when joining
+              </div>
+              <PaymentPrompt league={{ ...league, ...paymentEdits }} preview />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Members + payment status */}
+      {activeTab === 'members' && (
+        <div>
+          {league?.payment_required && (
+            <div style={{ background: 'rgba(0,200,83,0.08)', border: '1px solid rgba(0,200,83,0.2)', borderRadius: '10px', padding: '12px 16px', marginBottom: '1rem', fontSize: '0.875rem', color: '#00c853' }}>
+              <i className="fas fa-money-bill-wave" style={{ marginRight: '8px' }} />
+              {paidCount} of {members.filter(m => m.role !== 'commissioner').length} members have confirmed payment
+            </div>
+          )}
+          <div style={styles.section}>
+            {members.length === 0 ? (
+              <div style={{ padding: '1.5rem', textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>No members yet</div>
+            ) : (
+              members.map((m, i) => (
+                <div key={m.user_id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--pink), var(--violet))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#fff', flexShrink: 0 }}>
+                      {(m.username || '?')[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <div style={{ color: '#fff', fontWeight: '500', fontSize: '0.875rem' }}>{m.username}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>{m.role}</div>
+                    </div>
+                  </div>
+                  {league?.payment_required && m.role !== 'commissioner' && (
+                    <span style={{ fontSize: '0.78rem', fontWeight: '600', color: m.payment_confirmed ? '#00c853' : '#ffc107' }}>
+                      {m.payment_confirmed
+                        ? <><i className="fas fa-check-circle" style={{ marginRight: '4px' }} />Paid</>
+                        : <><i className="fas fa-clock" style={{ marginRight: '4px' }} />Pending</>}
+                    </span>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 

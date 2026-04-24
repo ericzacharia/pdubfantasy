@@ -173,21 +173,29 @@ const DraftView = () => {
       </button>
 
       {/* Draft Status Header */}
+      {(() => {
+        // Treat current_pick > total_picks as completed (can happen briefly after last pick)
+        const isEffectivelyDone = draftState.status === 'completed' ||
+          (draftState.total_picks > 0 && draftState.current_pick_number > draftState.total_picks);
+        const effectiveStatus = isEffectivelyDone ? 'completed' : draftState.status;
+        const numTeams = draftState.draft_order?.length || leagueTeams.length || 1;
+        const currentPick = Math.min(draftState.current_pick_number || 1, draftState.total_picks || 1);
+        const currentRound = Math.ceil(currentPick / Math.max(1, numTeams));
+        return (
       <div style={styles.draftHeader}>
         <div>
           <h2 style={styles.title}>Draft Room</h2>
           <div style={styles.meta}>
-            {draftState.status === 'pending' && <span style={{ color: '#ffc107' }}>Draft hasn't started</span>}
-            {draftState.status === 'in_progress' && (
-              <span>
-                Round {Math.ceil((draftState.current_pick_number || 1) / Math.max(1, draftState.draft_order?.length || 1))} ·
-                Pick {draftState.current_pick_number || 1} of {draftState.total_picks}
-              </span>
+            {effectiveStatus === 'pending' && <span style={{ color: '#ffc107' }}>Draft hasn't started</span>}
+            {effectiveStatus === 'in_progress' && (
+              <span>Round {currentRound} · Pick {currentPick} of {draftState.total_picks}</span>
             )}
-            {draftState.status === 'completed' && <span style={{ color: '#00c853' }}>Draft complete</span>}
+            {effectiveStatus === 'completed' && <span style={{ color: '#00c853' }}>
+              <i className="fas fa-check-circle" style={{ marginRight: '6px' }} />Draft complete — {draftState.total_picks} picks made
+            </span>}
           </div>
         </div>
-        {draftState.status === 'in_progress' && (
+        {effectiveStatus === 'in_progress' && (
           <div style={{ textAlign: 'right' }}>
             <div style={styles.turnIndicator}>
               {isMyTurn ? (
@@ -204,6 +212,7 @@ const DraftView = () => {
           </div>
         )}
       </div>
+        ); })()}
 
       {message && (
         <div style={{

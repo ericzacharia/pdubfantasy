@@ -311,13 +311,31 @@ const PlayersTable = () => {
 
       {/* Team filter chips */}
       <div className="pwhl-filter-chips" style={{ marginBottom: '8px' }}>
-        {['All', ...teams.map(t => t.abbreviation)].map(abbr => (
+        {/* "All" chip */}
+        <button
+          className={`pwhl-chip ${selectedTeam === 'All' ? 'active' : ''}`}
+          onClick={() => setSelectedTeam('All')}
+        >
+          All
+        </button>
+        {/* Team chips with logos */}
+        {teams.map(t => (
           <button
-            key={abbr}
-            className={`pwhl-chip ${selectedTeam === abbr ? 'active' : ''}`}
-            onClick={() => setSelectedTeam(abbr)}
+            key={t.abbreviation}
+            className={`pwhl-chip ${selectedTeam === t.abbreviation ? 'active' : ''}`}
+            onClick={() => setSelectedTeam(t.abbreviation)}
+            title={t.name || t.abbreviation}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px' }}
           >
-            {abbr}
+            {t.logo_url ? (
+              <img
+                src={t.logo_url}
+                alt={t.abbreviation}
+                style={{ width: '16px', height: '16px', objectFit: 'contain' }}
+                onError={e => { e.target.style.display = 'none'; }}
+              />
+            ) : null}
+            {t.abbreviation}
           </button>
         ))}
       </div>

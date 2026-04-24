@@ -171,7 +171,7 @@ const LeagueCard = ({ league, navigate, isJoined }) => {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
           <span style={{ ...styles.statusBadge, background: statusStyle.bg, color: statusStyle.text, display: 'flex', alignItems: 'center', gap: '5px' }}>
-            {isDrafting && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00c853', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />}
+            {isDrafting && <span className="pwhl-pulse" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00c853', display: 'inline-block' }} />}
             {DRAFT_STATUS_LABEL[status] || status}
           </span>
           {isJoined && (

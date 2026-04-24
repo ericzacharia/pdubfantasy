@@ -232,7 +232,7 @@ export const pwhlFantasyAPI = {
 // ── Trends ──
 export const pwhlTrendsAPI = {
   getTrends: (params = {}) =>
-    pwhlApi.get('/trends', { params }),
+    pwhlApi.get('/trends', { params: { limit: 100, ...params } }),
 };
 
 export default pwhlApi;

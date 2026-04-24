@@ -194,6 +194,15 @@ const TrendCard = ({ trend, idx, teamLogos, playerData, navigate }) => {
   const altBg = idx % 2 === 1 ? 'rgba(106,0,255,0.06)' : 'rgba(255,255,255,0.04)';
   const teamLogo = trend.team && teamLogos[trend.team];
   const playerInfo = trend.player && playerData[trend.player];
+  const hasArticle = !!trend.article_url;
+
+  const dateStr = trend.computed_at
+    ? new Date(trend.computed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null;
+
+  const handleClick = () => {
+    if (hasArticle) window.open(trend.article_url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div
@@ -201,9 +210,12 @@ const TrendCard = ({ trend, idx, teamLogos, playerData, navigate }) => {
         ...styles.card,
         background: hovered ? sev.bg : altBg,
         borderColor: hovered ? sev.border : 'rgba(255,255,255,0.08)',
+        cursor: hasArticle ? 'pointer' : 'default',
+        position: 'relative',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={handleClick}
     >
       <div style={styles.cardHeader}>
         <div style={styles.iconCircle}>
@@ -212,6 +224,14 @@ const TrendCard = ({ trend, idx, teamLogos, playerData, navigate }) => {
         <span style={{ ...styles.categoryBadge, color: sev.color, background: sev.bg, borderColor: sev.border }}>
           {trend.category || 'General'}
         </span>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {dateStr && <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)' }}>{dateStr}</span>}
+          {hasArticle && (
+            <span style={{ fontSize: '0.68rem', color: sev.color, display: 'flex', alignItems: 'center', gap: '3px' }} title="Read related article">
+              <i className="fas fa-external-link-alt" style={{ fontSize: '0.6rem' }} /> Article
+            </span>
+          )}
+        </div>
       </div>
 
       <h4 style={styles.cardTitle}>{trend.title}</h4>
@@ -270,7 +290,7 @@ const styles = {
   loading: { textAlign: 'center', padding: '3rem', color: 'rgba(255,255,255,0.65)' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' },
   card: { borderRadius: '12px', border: '1px solid', padding: '18px', transition: 'all 0.2s ease' },
-  cardHeader: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' },
+  cardHeader: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', flexWrap: 'nowrap' },
   iconCircle: { width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   categoryBadge: { padding: '3px 10px', borderRadius: '12px', border: '1px solid', fontSize: '0.72rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em' },
   cardTitle: { fontSize: '0.95rem', fontWeight: '700', color: '#fff', margin: '0 0 8px', lineHeight: '1.4' },

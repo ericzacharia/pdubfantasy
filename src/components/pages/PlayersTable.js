@@ -357,24 +357,22 @@ const PlayersTable = () => {
       <div style={styles.scoringLegend}>
         <span style={styles.scoringLegendLabel}>FP scoring:</span>
         {(playerType === 'skaters' ? [
-          { stat: 'Goal',   pts: '+2',   color: '#00c853' },
-          { stat: 'Assist', pts: '+1',   color: '#69db7c' },
-          { stat: 'SOG',    pts: '+0.1', color: '#a3e0b5' },
-          { stat: '+/-',    pts: '0',    color: 'rgba(255,255,255,0.25)', muted: true },
-          { stat: 'PIM',    pts: '0',    color: 'rgba(255,255,255,0.25)', muted: true },
-          { stat: 'Hit',    pts: '0',    color: 'rgba(255,255,255,0.25)', muted: true },
-          { stat: 'Block',  pts: '0',    color: 'rgba(255,255,255,0.25)', muted: true },
+          { stat: 'Goal',   pts: '+2',    color: '#00c853' },
+          { stat: 'Assist', pts: '+1.5',  color: '#69db7c' },
+          { stat: 'SOG',    pts: '+0.1',  color: '#a3e0b5' },
+          { stat: '+/-',    pts: '+0.5',  color: '#60a5fa' },
+          { stat: 'Block',  pts: '+0.1',  color: '#93c5fd' },
+          { stat: 'PIM',    pts: '−0.1',  color: '#fca5a5' },
         ] : [
           { stat: 'Win',      pts: '+4',   color: '#60a5fa' },
           { stat: 'Save',     pts: '+0.2', color: '#93c5fd' },
           { stat: 'Shutout',  pts: '+3',   color: '#34d399' },
           { stat: 'OT Loss',  pts: '+1',   color: '#ffc107' },
           { stat: 'GA',       pts: '−2',   color: '#ff5252' },
-        ]).map(({ stat, pts, color, muted }) => (
-          <div key={stat} title={muted ? 'Not scored in default leagues — configurable via commissioner settings' : undefined}
-            style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 10px', background: muted ? 'rgba(255,255,255,0.04)' : color + '15', borderRadius: '20px', border: `1px solid ${muted ? 'rgba(255,255,255,0.1)' : color + '33'}` }}>
-            <span style={{ fontWeight: '600', color: muted ? 'rgba(255,255,255,0.35)' : color, fontSize: '0.78rem' }}>{stat}</span>
-            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem' }}>= {pts}</span>
+        ]).map(({ stat, pts, color }) => (
+          <div key={stat} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 10px', background: color + '15', borderRadius: '20px', border: `1px solid ${color}33` }}>
+            <span style={{ fontWeight: '700', color, fontSize: '0.78rem' }}>{stat}</span>
+            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem' }}>= {pts}</span>
           </div>
         ))}
       </div>

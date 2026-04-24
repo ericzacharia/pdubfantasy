@@ -5,16 +5,19 @@ import { pwhlAuthAPI } from '../../services/pwhlAPI';
 
 const SCORING_RULES = [
   { category: 'Skater', rules: [
-    { stat: 'Goal',   pts: '+2.0', icon: 'fas fa-hockey-puck' },
-    { stat: 'Assist', pts: '+1.0', icon: 'fas fa-hands-helping' },
-    { stat: 'Shot on Goal', pts: '+0.1', icon: 'fas fa-bullseye' },
+    { stat: 'Goal',         pts: '+2.0',  icon: 'fas fa-hockey-puck' },
+    { stat: 'Assist',       pts: '+1.5',  icon: 'fas fa-hands-helping' },
+    { stat: 'Shot on Goal', pts: '+0.1',  icon: 'fas fa-bullseye' },
+    { stat: '+/-',          pts: '+0.5',  icon: 'fas fa-plus-minus' },
+    { stat: 'Block',        pts: '+0.1',  icon: 'fas fa-shield-alt' },
+    { stat: 'PIM',          pts: '−0.1',  icon: 'fas fa-gavel' },
   ]},
   { category: 'Goalie', rules: [
-    { stat: 'Win',      pts: '+4.0', icon: 'fas fa-trophy' },
-    { stat: 'Save',     pts: '+0.2', icon: 'fas fa-hand-paper' },
-    { stat: 'Goals Against', pts: '-2.0', icon: 'fas fa-times-circle' },
-    { stat: 'Shutout',  pts: '+3.0', icon: 'fas fa-shield-alt' },
-    { stat: 'OT Loss',  pts: '+1.0', icon: 'fas fa-clock' },
+    { stat: 'Win',           pts: '+4.0', icon: 'fas fa-trophy' },
+    { stat: 'Save',          pts: '+0.2', icon: 'fas fa-hand-paper' },
+    { stat: 'Goals Against', pts: '−2.0', icon: 'fas fa-times-circle' },
+    { stat: 'Shutout',       pts: '+3.0', icon: 'fas fa-shield-alt' },
+    { stat: 'OT Loss',       pts: '+1.0', icon: 'fas fa-clock' },
   ]},
 ];
 

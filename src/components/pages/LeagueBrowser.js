@@ -106,9 +106,12 @@ const MyLeaguesTab = ({ leagues, navigate, userId }) => {
 const PublicLeaguesTab = ({ myLeagues, navigate, userId }) => {
   const myLeagueIds = new Set(myLeagues.map(l => l.id));
   const [search, setSearch]           = useState('');
-  const [draftStatus, setDraftStatus] = useState('');
-  const [size, setSize]               = useState('');
-  const [draftType, setDraftType]     = useState('');
+  const [draftStatus, setDraftStatus]     = useState('');
+  const [size, setSize]                   = useState('');
+  const [draftType, setDraftType]         = useState('');
+  const [waiverType, setWaiverType]       = useState('');
+  const [playoffTeams, setPlayoffTeams]   = useState('');
+  const [openSpotsOnly, setOpenSpotsOnly] = useState(false);
   const [page, setPage]               = useState(1);
   const [data, setData]               = useState({ leagues: [], total: 0, pages: 1 });
   const [loading, setLoading]         = useState(true);
@@ -118,15 +121,18 @@ const PublicLeaguesTab = ({ myLeagues, navigate, userId }) => {
     setLoading(true);
     try {
       const params = { page, page_size: PAGE_SIZE };
-      if (search)      params.q            = search;
-      if (draftStatus) params.draft_status = draftStatus;
-      if (size)        params.size         = size;
-      if (draftType)   params.draft_type   = draftType;
+      if (search)       params.q             = search;
+      if (draftStatus)  params.draft_status  = draftStatus;
+      if (size)         params.size          = size;
+      if (draftType)    params.draft_type    = draftType;
+      if (waiverType)   params.waiver_type   = waiverType;
+      if (playoffTeams) params.playoff_teams = playoffTeams;
+      if (openSpotsOnly) params.has_open_spots = true;
       const res = await pwhlFantasyAPI.getPublicLeagues(params);
       setData(res.data || { leagues: [], total: 0, pages: 1 });
     } catch { setData({ leagues: [], total: 0, pages: 1 }); }
     finally { setLoading(false); }
-  }, [search, draftStatus, size, draftType, page]);
+  }, [search, draftStatus, size, draftType, waiverType, playoffTeams, openSpotsOnly, page]);
 
   useEffect(() => {
     const t = setTimeout(fetchLeagues, search ? 350 : 0);
@@ -134,7 +140,7 @@ const PublicLeaguesTab = ({ myLeagues, navigate, userId }) => {
   }, [fetchLeagues, search]);
 
   // Reset to page 1 when filters change
-  useEffect(() => { setPage(1); }, [search, draftStatus, size, draftType]);
+  useEffect(() => { setPage(1); }, [search, draftStatus, size, draftType, waiverType, playoffTeams, openSpotsOnly]);
 
   return (
     <div>
@@ -163,6 +169,29 @@ const PublicLeaguesTab = ({ myLeagues, navigate, userId }) => {
           <option value="snake">Snake</option>
           <option value="auction">Auction</option>
         </select>
+
+        <select value={waiverType} onChange={e => setWaiverType(e.target.value)} style={styles.filterSelect} aria-label="Filter by waiver type">
+          <option value="">Any Waivers</option>
+          <option value="rolling">Rolling Waivers</option>
+          <option value="faab">FAAB</option>
+        </select>
+
+        <select value={playoffTeams} onChange={e => setPlayoffTeams(e.target.value)} style={styles.filterSelect} aria-label="Filter by playoff teams">
+          <option value="">Any Playoffs</option>
+          <option value="4">4-Team Playoffs</option>
+          <option value="6">6-Team Playoffs</option>
+          <option value="8">8-Team Playoffs</option>
+        </select>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: '7px', color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          <input
+            type="checkbox"
+            checked={openSpotsOnly}
+            onChange={e => setOpenSpotsOnly(e.target.checked)}
+            style={{ accentColor: 'var(--pink)', width: '15px', height: '15px', cursor: 'pointer' }}
+          />
+          Open spots only
+        </label>
 
         <span style={{ marginLeft: 'auto', fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>
           {loading ? '…' : `${data.total.toLocaleString()} leagues`}

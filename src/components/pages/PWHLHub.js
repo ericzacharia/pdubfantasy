@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PlayersTable from './PlayersTable';
 import StandingsTable from './StandingsTable';
 import ScheduleView from './ScheduleView';
@@ -11,7 +12,9 @@ const SUB_TABS = [
 ];
 
 const PWHLHub = () => {
-  const [activeTab, setActiveTab] = useState('players');
+  const [searchParams] = useSearchParams();
+  // Default to Players tab when arriving with a ?team= filter (e.g. from Trends)
+  const [activeTab, setActiveTab] = useState(searchParams.get('team') ? 'players' : 'players');
   const [hoveredTab, setHoveredTab] = useState(null);
   const [showAnalyzer, setShowAnalyzer] = useState(false);
 

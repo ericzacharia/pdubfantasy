@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import PlayerAvatar from '../PlayerAvatar';
 import { useWatchlist } from '../../hooks/useWatchlist';
 import { pwhlPlayersAPI, pwhlFantasyAPI, pwhlLeagueAPI } from '../../services/pwhlAPI';
@@ -52,6 +52,7 @@ const QUICK_FILTERS = [
 
 const PlayersTable = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isPwhlAuthenticated } = usePwhlAuth();
   const { watchlist, toggle: toggleWatch, isWatched } = useWatchlist();
   const [playerType, setPlayerType] = useState('skaters');
@@ -63,7 +64,8 @@ const PlayersTable = () => {
   const [perGame, setPerGame] = useState(false);
   const [showWatchlist, setShowWatchlist] = useState(false);
   const [search, setSearch] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState('All');
+  // Pre-select team from ?team= query param (e.g. from Trends page)
+  const [selectedTeam, setSelectedTeam] = useState(searchParams.get('team') || 'All');
   const [selectedPosition, setSelectedPosition] = useState('All');
   const [selectedSeason, setSelectedSeason] = useState('2025-2026');
   const [sortBy, setSortBy] = useState('fantasy_value');

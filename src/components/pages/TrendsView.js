@@ -218,21 +218,23 @@ const TrendCard = ({ trend, teamLogos, playerData, navigate }) => {
       {(trend.team || trend.player) && (
         <div style={styles.tagRow}>
           {trend.team && (
-            teamLogo ? (
-              <div style={styles.teamTag} title={trend.team}>
+            <div
+              style={{ ...styles.teamTag, cursor: 'pointer' }}
+              onClick={() => navigate(`/hub?team=${encodeURIComponent(trend.team)}`)}
+              title={`View ${trend.team} players`}
+            >
+              {teamLogo ? (
                 <img
                   src={teamLogo}
                   alt={trend.team}
                   style={{ width: '18px', height: '18px', objectFit: 'contain' }}
                   onError={e => { e.target.style.display = 'none'; }}
                 />
-                <span>{trend.team}</span>
-              </div>
-            ) : (
-              <span style={styles.tag}>
-                <i className="fas fa-shield-alt" style={{ marginRight: '4px', fontSize: '0.7rem' }} />{trend.team}
-              </span>
-            )
+              ) : (
+                <i className="fas fa-shield-alt" style={{ fontSize: '0.7rem' }} />
+              )}
+              <span style={{ transition: 'color 0.15s' }}>{trend.team}</span>
+            </div>
           )}
           {trend.player && (
             <div

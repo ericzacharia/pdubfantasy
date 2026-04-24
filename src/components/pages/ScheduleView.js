@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { pwhlLeagueAPI, pwhlPlayersAPI } from '../../services/pwhlAPI';
 
 const DEFAULT_UPCOMING = 5;
+const STEP = 10;
 // 2025-26 regular season opened November 21, 2025
 const REGULAR_SEASON_START = new Date('2025-11-21T00:00:00');
 const DEFAULT_RESULTS  = 5;
@@ -14,7 +15,7 @@ const ScheduleView = () => {
   const [teams, setTeams]                 = useState([]);
   const [loading, setLoading]             = useState(true);
   const [selectedTeam, setSelectedTeam]   = useState('All');
-  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+  const [upcomingLimit, setUpcomingLimit] = useState(DEFAULT_UPCOMING);
   const [showAllResults, setShowAllResults]   = useState(false);
 
   useEffect(() => {
@@ -59,7 +60,7 @@ const ScheduleView = () => {
   const filteredUpcoming = useMemo(() => filterGames(upcoming), [upcoming, selectedTeam]);
   const filteredResults  = useMemo(() => filterGames(results),  [results, selectedTeam]);
 
-  const visibleUpcoming = showAllUpcoming ? filteredUpcoming : filteredUpcoming.slice(0, DEFAULT_UPCOMING);
+  const visibleUpcoming = filteredUpcoming.slice(0, upcomingLimit);
   const visibleResults  = showAllResults  ? filteredResults  : filteredResults.slice(0, DEFAULT_RESULTS);
 
   if (loading) return <div style={s.loading}><i className="fas fa-spinner fa-spin" style={{ marginRight: '8px' }} />Loading schedule...</div>;
@@ -69,13 +70,13 @@ const ScheduleView = () => {
       {/* Team filter */}
       <div className="pwhl-filter-chips" style={{ marginBottom: '1.25rem' }}>
         <button className={`pwhl-chip ${selectedTeam === 'All' ? 'active' : ''}`}
-          onClick={() => { setSelectedTeam('All'); setShowAllUpcoming(false); setShowAllResults(false); }}>
+          onClick={() => { setSelectedTeam('All'); setUpcomingLimit(DEFAULT_UPCOMING); setShowAllResults(false); }}>
           All Teams
         </button>
         {teams.map(t => (
           <button key={t.abbreviation}
             className={`pwhl-chip ${selectedTeam === t.abbreviation ? 'active' : ''}`}
-            onClick={() => { setSelectedTeam(t.abbreviation); setShowAllUpcoming(false); setShowAllResults(false); }}
+            onClick={() => { setSelectedTeam(t.abbreviation); setUpcomingLimit(DEFAULT_UPCOMING); setShowAllResults(false); }}
             title={t.name}
             style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
           >
@@ -101,10 +102,19 @@ const ScheduleView = () => {
           <div style={s.gameList}>
             {visibleUpcoming.map((game, idx) => <GameCard key={game.id || idx} game={game} navigate={navigate} />)}
           </div>
-          {filteredUpcoming.length > DEFAULT_UPCOMING && (
-            <button style={s.expandBtn} onClick={() => setShowAllUpcoming(v => !v)}>
-              <i className={`fas fa-chevron-${showAllUpcoming ? 'up' : 'down'}`} style={{ marginRight: '6px' }} />
-              {showAllUpcoming ? 'Show fewer' : `Show all ${filteredUpcoming.length} upcoming games`}
+          {filteredUpcoming.length > upcomingLimit && (
+            <button style={s.expandBtn} onClick={() => setUpcomingLimit(v => Math.min(v + STEP, filteredUpcoming.length))}>
+              <i className="fas fa-chevron-down" style={{ marginRight: '6px' }} />
+              Show {Math.min(STEP, filteredUpcoming.length - upcomingLimit)} more
+              <span style={{ marginLeft: '4px', color: 'rgba(255,255,255,0.3)' }}>
+                ({upcomingLimit} of {filteredUpcoming.length})
+              </span>
+            </button>
+          )}
+          {upcomingLimit > DEFAULT_UPCOMING && (
+            <button style={{ ...s.expandBtn, marginTop: '4px' }} onClick={() => setUpcomingLimit(DEFAULT_UPCOMING)}>
+              <i className="fas fa-chevron-up" style={{ marginRight: '6px' }} />
+              Show fewer
             </button>
           )}
         </>

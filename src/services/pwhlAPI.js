@@ -118,8 +118,8 @@ export const pwhlLeagueAPI = {
     pwhlApi.get(`/pwhl/teams/${teamId}/roster`),
   getGames: (params = {}) =>
     pwhlApi.get('/games', { params }),
-  getUpcomingGames: () =>
-    pwhlApi.get('/pwhl/games/upcoming'),
+  getUpcomingGames: (days = 180) =>
+    pwhlApi.get('/pwhl/games/upcoming', { params: { days } }),
   getArticles: (params = {}) =>
     pwhlApi.get('/pwhl/articles', { params }),
   getNews: () =>

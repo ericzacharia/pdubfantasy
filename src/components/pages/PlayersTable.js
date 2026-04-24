@@ -20,7 +20,7 @@ const PosBadge = ({ pos }) => {
 const SKATER_COLS = [
   { key: 'rank',        label: 'Rank',    sortKey: null,             width: '42px', flex: false },
   { key: 'name',        label: 'Player',  sortKey: 'name',          width: '220px', flex: false },
-  { key: 'jersey',      label: '#',       sortKey: null,             width: '38px', flex: false },
+  { key: 'jersey',      label: 'No.',     sortKey: 'jersey_number',  width: '42px', flex: false },
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   flex: true },
   { key: 'goals',       label: 'G',       sortKey: 'goals',          flex: true },
   { key: 'assists',     label: 'A',       sortKey: 'assists',        flex: true },
@@ -34,7 +34,7 @@ const SKATER_COLS = [
 const GOALIE_COLS = [
   { key: 'rank',        label: 'Rank',    sortKey: null,             width: '42px', flex: false },
   { key: 'name',        label: 'Player',  sortKey: 'name',          width: '220px', flex: false },
-  { key: 'jersey',      label: '#',       sortKey: null,             width: '38px', flex: false },
+  { key: 'jersey',      label: 'No.',     sortKey: 'jersey_number',  width: '42px', flex: false },
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   flex: true },
   { key: 'wins',        label: 'W',       sortKey: 'wins',           flex: true },
   { key: 'losses',      label: 'L',       sortKey: 'losses',         flex: true },
@@ -171,7 +171,7 @@ const PlayersTable = () => {
     switch (key) {
       case 'name':       return `${player.first_name} ${player.last_name}`;
       case 'rank':       return null; // rendered by PlayerRow using rank prop
-      case 'jersey':     return player.jersey_number ? `#${player.jersey_number}` : '—';
+      case 'jersey':     return player.jersey_number ?? '—';
       case 'team':       return player.team_abbreviation || '—';
       case 'position':   return player.position || '—';
       case 'gp':         return stats.games_played ?? player.games_played ?? 0;
@@ -508,7 +508,7 @@ const PlayerRow = ({ player, cols, getCellValue, idx, rank, teamLogoMap, navigat
             <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', fontWeight: '500' }}>{rank}</span>
           ) : col.key === 'jersey' ? (
             <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem' }}>
-              {player.jersey_number ? `#${player.jersey_number}` : '—'}
+              {player.jersey_number ?? '—'}
             </span>
           ) : col.key === 'team' ? null : (
             (() => {

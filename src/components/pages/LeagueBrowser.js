@@ -150,38 +150,52 @@ const LeagueCard = ({ league, navigate, isJoined }) => {
   const [hovered, setHovered] = useState(false);
   const status = league.draft_status || 'pending';
   const statusStyle = DRAFT_STATUS_COLOR[status] || DRAFT_STATUS_COLOR.pending;
+  const isDrafting = status === 'in_progress';
   const openSpots = (league.max_teams || 10) - (league.member_count || 0);
 
   return (
     <div
-      style={{ ...styles.leagueCard, ...(hovered ? styles.leagueCardHover : {}) }}
+      style={{
+        ...styles.leagueCard,
+        ...(hovered ? styles.leagueCardHover : {}),
+        ...(isDrafting ? { borderColor: 'rgba(0,200,83,0.3)', boxShadow: '0 0 0 1px rgba(0,200,83,0.15)' } : {}),
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => navigate(`/leagues/${league.id}`)}
     >
       <div style={styles.leagueCardTop}>
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={styles.leagueName}>{league.name}</div>
-          <div style={styles.leagueMeta}>{league.season} · {league.member_count || 0}/{league.max_teams || 10} teams</div>
+          <div style={styles.leagueMeta}>{league.season} · {league.member_count || 0}/{league.max_teams || 10} teams · {league.draft_type === 'auction' ? 'Auction' : 'Snake'}</div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-          <span style={{ ...styles.statusBadge, background: statusStyle.bg, color: statusStyle.text }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
+          <span style={{ ...styles.statusBadge, background: statusStyle.bg, color: statusStyle.text, display: 'flex', alignItems: 'center', gap: '5px' }}>
+            {isDrafting && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00c853', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />}
             {DRAFT_STATUS_LABEL[status] || status}
           </span>
           {isJoined && (
-            <span style={{ ...styles.statusBadge, background: 'rgba(255,124,222,0.15)', color: 'var(--pink)' }}>
-              Joined
-            </span>
+            <span style={{ ...styles.statusBadge, background: 'rgba(255,124,222,0.15)', color: 'var(--pink)' }}>Joined</span>
           )}
         </div>
       </div>
+
       <div style={styles.leagueCardFooter}>
         <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem' }}>
-          <i className="fas fa-users" style={{ marginRight: '5px' }} />{openSpots} spot{openSpots !== 1 ? 's' : ''} open
+          <i className="fas fa-users" style={{ marginRight: '5px' }} />{league.member_count || 0}/{league.max_teams || 10} members
         </span>
-        <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.8rem' }}>
-          {league.draft_type === 'auction' ? 'Auction' : 'Snake'} Draft
-        </span>
+        {isDrafting ? (
+          <button
+            style={styles.draftBtn}
+            onClick={e => { e.stopPropagation(); navigate(`/draft/${league.id}`); }}
+          >
+            <i className="fas fa-random" style={{ marginRight: '5px' }} />Enter Draft Room
+          </button>
+        ) : (
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
+            {status === 'pending' ? 'Draft not started' : 'Season active'}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -314,7 +328,8 @@ const styles = {
   leagueName: { fontSize: '1.05rem', fontWeight: '600', color: '#fff', marginBottom: '4px' },
   leagueMeta: { fontSize: '0.8rem', color: 'rgba(255,255,255,0.65)' },
   statusBadge: { padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600' },
-  leagueCardFooter: { display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.07)' },
+  leagueCardFooter: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.07)' },
+  draftBtn: { background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,200,83,0.1))', border: '1px solid rgba(0,200,83,0.4)', color: '#00c853', padding: '5px 12px', borderRadius: '7px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center' },
   modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' },
   modalCard: { background: '#1e0a3c', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '1.5rem', width: '100%', maxWidth: '420px' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' },

@@ -48,10 +48,10 @@ const POSITIONS = ['All', 'C', 'LW', 'RW', 'D', 'G'];
 const SEASONS = ['2025-2026', '2024-2025', '2024'];
 const QUICK_FILTERS = [
   { label: '⭐ Watchlist', sortBy: null,           special: 'watchlist' },
-  { label: '🏒 Top FP',   sortBy: 'fantasy_value' },
-  { label: '🥅 Goals',    sortBy: 'goals' },
-  { label: '🎯 Assists',  sortBy: 'assists' },
-  { label: '💥 Points',   sortBy: 'points' },
+  { label: 'FP',           sortBy: 'fantasy_value' },
+  { label: 'Goals',        sortBy: 'goals' },
+  { label: 'Assists',      sortBy: 'assists' },
+  { label: 'Points',       sortBy: 'points' },
 ];
 
 const PlayersTable = () => {

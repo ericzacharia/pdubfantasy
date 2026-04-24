@@ -18,7 +18,9 @@ const PosBadge = ({ pos }) => {
 
 // name col fixed, stat cols flex so they expand to fill available space
 const SKATER_COLS = [
+  { key: 'rank',        label: 'Rank',    sortKey: null,             width: '42px', flex: false },
   { key: 'name',        label: 'Player',  sortKey: 'name',          width: '220px', flex: false },
+  { key: 'jersey',      label: '#',       sortKey: null,             width: '38px', flex: false },
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   flex: true },
   { key: 'goals',       label: 'G',       sortKey: 'goals',          flex: true },
   { key: 'assists',     label: 'A',       sortKey: 'assists',        flex: true },
@@ -30,7 +32,9 @@ const SKATER_COLS = [
 ];
 
 const GOALIE_COLS = [
+  { key: 'rank',        label: 'Rank',    sortKey: null,             width: '42px', flex: false },
   { key: 'name',        label: 'Player',  sortKey: 'name',          width: '220px', flex: false },
+  { key: 'jersey',      label: '#',       sortKey: null,             width: '38px', flex: false },
   { key: 'gp',          label: 'GP',      sortKey: 'games_played',   flex: true },
   { key: 'wins',        label: 'W',       sortKey: 'wins',           flex: true },
   { key: 'losses',      label: 'L',       sortKey: 'losses',         flex: true },
@@ -168,6 +172,8 @@ const PlayersTable = () => {
     const stats = player.season_stats || {};
     switch (key) {
       case 'name':       return `${player.first_name} ${player.last_name}`;
+      case 'rank':       return null; // rendered by PlayerRow using rank prop
+      case 'jersey':     return player.jersey_number ? `#${player.jersey_number}` : '—';
       case 'team':       return player.team_abbreviation || '—';
       case 'position':   return player.position || '—';
       case 'gp':         return stats.games_played ?? player.games_played ?? 0;
@@ -370,6 +376,7 @@ const PlayersTable = () => {
             ) : (
               displayPlayers.map((player, idx) => (
                 <PlayerRow key={player.id} player={player} cols={cols} getCellValue={getCellValue} idx={idx} navigate={navigate}
+                  rank={(page - 1) * PAGE_SIZE + idx + 1}
                   isWatched={isWatched(player.id)} onToggleWatch={(e) => { e.stopPropagation(); toggleWatch(player.id); }}
                   hasGameToday={gameTodayIds.has(player.pwhl_team_id)}
                   perGame={perGame} applyPerGame={applyPerGame}
@@ -406,7 +413,7 @@ const PlayersTable = () => {
   );
 };
 
-const PlayerRow = ({ player, cols, getCellValue, idx, navigate, isWatched, onToggleWatch, hasGameToday, perGame, applyPerGame }) => {
+const PlayerRow = ({ player, cols, getCellValue, idx, rank, navigate, isWatched, onToggleWatch, hasGameToday, perGame, applyPerGame }) => {
   const [hovered, setHovered] = useState(false);
   const gp = player.season_stats?.games_played || 1;
 
@@ -466,6 +473,12 @@ const PlayerRow = ({ player, cols, getCellValue, idx, navigate, isWatched, onTog
               )}
               {hovered && !isWatched && <i className="fas fa-chevron-right" style={{ fontSize: '0.65rem', color: 'var(--text-faint)', flexShrink: 0 }} />}
             </div>
+          ) : col.key === 'rank' ? (
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', fontWeight: '500' }}>{rank}</span>
+          ) : col.key === 'jersey' ? (
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem' }}>
+              {player.jersey_number ? `#${player.jersey_number}` : '—'}
+            </span>
           ) : col.key === 'team' ? null : (
             (() => {
               const raw = getCellValue(player, col.key);

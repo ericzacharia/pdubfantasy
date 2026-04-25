@@ -47,13 +47,6 @@ const GOALIE_COLS = [
 
 const POSITIONS = ['All', 'F', 'D', 'G'];
 const SEASONS = ['2025-2026', '2024-2025', '2024'];
-const QUICK_FILTERS = [
-  { label: '⭐ Watchlist', sortBy: null,           special: 'watchlist' },
-  { label: 'FP',           sortBy: 'fantasy_value' },
-  { label: 'Goals',        sortBy: 'goals' },
-  { label: 'Assists',      sortBy: 'assists' },
-  { label: 'Points',       sortBy: 'points' },
-];
 
 const PlayersTable = () => {
   const navigate = useNavigate();
@@ -208,32 +201,8 @@ const PlayersTable = () => {
 
   return (
     <div>
-      {/* Quick filter chips */}
-      <div className="pwhl-filter-chips" style={{ marginBottom: '10px' }}>
-        {QUICK_FILTERS.map(qf => (
-          <button
-            key={qf.special || qf.sortBy}
-            className={`pwhl-chip ${qf.special === 'watchlist' ? (showWatchlist ? 'active' : '') : (sortBy === qf.sortBy ? 'active' : '')}`}
-            onClick={() => {
-              if (qf.special === 'watchlist') { setShowWatchlist(w => !w); return; }
-              setSortBy(qf.sortBy);
-              setSortDir('desc');
-              if (['goals','assists','points'].includes(qf.sortBy)) setPlayerType('skaters');
-            }}
-            aria-pressed={qf.special === 'watchlist' ? showWatchlist : sortBy === qf.sortBy}
-          >
-            {qf.label}
-            {qf.special === 'watchlist' && watchlist.size > 0 && (
-              <span style={{ marginLeft: '5px', background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0 6px', fontSize: '0.65rem', fontWeight: '700' }}>
-                {watchlist.size}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
       {/* Controls row */}
-      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
         {/* Skaters/Goalies */}
         <div style={styles.typeToggle}>
           {['skaters', 'goalies'].map(t => (
@@ -257,6 +226,22 @@ const PlayersTable = () => {
         <select value={selectedSeason} onChange={e => setSelectedSeason(e.target.value)} style={styles.select}>
           {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
+
+        {/* Watchlist toggle */}
+        <button
+          className={`pwhl-chip ${showWatchlist ? 'active' : ''}`}
+          onClick={() => setShowWatchlist(w => !w)}
+          aria-pressed={showWatchlist}
+          style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+        >
+          <i className={showWatchlist ? 'fas fa-star' : 'far fa-star'} style={{ fontSize: '0.75rem' }} />
+          Watchlist
+          {watchlist.size > 0 && (
+            <span style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0 6px', fontSize: '0.65rem', fontWeight: '700' }}>
+              {watchlist.size}
+            </span>
+          )}
+        </button>
 
         {/* Active filter badges + clear */}
         {hasActiveFilters && (
@@ -361,11 +346,11 @@ const PlayersTable = () => {
           { stat: 'Block',  pts: '+0.1',  color: '#93c5fd' },
           { stat: 'PIM',    pts: '−0.1',  color: '#fca5a5' },
         ] : [
-          { stat: 'Win',      pts: '+4',   color: '#60a5fa' },
-          { stat: 'Save',     pts: '+0.2', color: '#93c5fd' },
-          { stat: 'Shutout',  pts: '+3',   color: '#34d399' },
-          { stat: 'OT Loss',  pts: '+1',   color: '#ffc107' },
-          { stat: 'GA',       pts: '−2',   color: '#ff5252' },
+          { stat: 'Save',     pts: '+0.20', color: '#93c5fd' },
+          { stat: 'Win',      pts: '+1',    color: '#60a5fa' },
+          { stat: 'Shutout',  pts: '+1.5',  color: '#34d399' },
+          { stat: 'OT Loss',  pts: '+1',    color: '#ffc107' },
+          { stat: 'GA',       pts: '−1.5',  color: '#ff5252' },
         ]).map(({ stat, pts, color }) => (
           <div key={stat} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '3px 10px', background: color + '15', borderRadius: '20px', border: `1px solid ${color}33` }}>
             <span style={{ fontWeight: '700', color, fontSize: '0.78rem' }}>{stat}</span>

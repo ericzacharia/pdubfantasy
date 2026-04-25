@@ -3,11 +3,11 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { usePwhlAuth } from '../../contexts/PwhlAuthContext';
 
 const tabs = [
-  { id: 'home',     path: '/',          label: 'Home',     icon: 'fas fa-home' },
-  { id: 'hub',      path: '/hub',      label: 'PWHL Hub', icon: 'fas fa-hockey-puck' },
-  { id: 'leagues',  path: '/leagues',  label: 'Leagues',  icon: 'fas fa-trophy' },
-  { id: 'trends',   path: '/trends',   label: 'Trends',   icon: 'fas fa-chart-line' },
-  { id: 'settings', path: '/settings',  label: 'More',     icon: 'fas fa-ellipsis-h' },
+  { id: 'home',     path: '/',         label: 'Home',    mobileLabel: 'Home',    icon: 'fas fa-home' },
+  { id: 'hub',      path: '/hub',      label: 'PWHL Hub', mobileLabel: 'Hub',    icon: 'fas fa-hockey-puck' },
+  { id: 'leagues',  path: '/leagues',  label: 'Leagues', mobileLabel: 'Leagues', icon: 'fas fa-trophy' },
+  { id: 'trends',   path: '/trends',   label: 'Trends',  mobileLabel: 'Trends',  icon: 'fas fa-chart-line' },
+  { id: 'settings', path: '/settings', label: 'More',    mobileLabel: 'More',    icon: 'fas fa-ellipsis-h' },
 ];
 
 const PWHLLayout = () => {
@@ -18,7 +18,7 @@ const PWHLLayout = () => {
 
   const getActiveTab = () => {
     const path = location.pathname;
-    if (path === '/' || path === '/') return 'home';
+    if (path === '/') return 'home';
     if (path.startsWith('/hub')) return 'hub';
     if (path.startsWith('/leagues') || path.startsWith('/teams') || path.startsWith('/draft') || path.startsWith('/waivers') || path.startsWith('/trades') || path.startsWith('/matchup') || path.startsWith('/commissioner') || path.startsWith('/scoring')) return 'leagues';
     if (path.startsWith('/trends')) return 'trends';
@@ -31,7 +31,7 @@ const PWHLLayout = () => {
   const activeTab = getActiveTab();
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="pwhl-layout-container">
       <div style={styles.header}>
         <h1 style={styles.title}>PWHL Fantasy Hockey</h1>
         {!isPwhlAuthenticated && (
@@ -46,7 +46,8 @@ const PWHLLayout = () => {
         )}
       </div>
 
-      <div style={styles.tabBar}>
+      {/* Desktop top tab bar */}
+      <div style={styles.tabBar} className="pwhl-top-nav">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const isHovered = hoveredTab === tab.id;
@@ -62,14 +63,8 @@ const PWHLLayout = () => {
               onMouseEnter={() => setHoveredTab(tab.id)}
               onMouseLeave={() => setHoveredTab(null)}
             >
-              <i className={tab.icon} style={{
-                ...styles.tabIcon,
-                color: isActive ? 'var(--pink)' : 'rgba(255,255,255,0.80)',
-              }} />
-              <span style={{
-                ...styles.tabLabel,
-                color: isActive ? '#fff' : 'rgba(255,255,255,0.80)',
-              }}>
+              <i className={tab.icon} style={{ ...styles.tabIcon, color: isActive ? 'var(--pink)' : 'rgba(255,255,255,0.80)' }} />
+              <span style={{ ...styles.tabLabel, color: isActive ? '#fff' : 'rgba(255,255,255,0.80)' }}>
                 {tab.label}
               </span>
             </button>
@@ -77,11 +72,11 @@ const PWHLLayout = () => {
         })}
       </div>
 
-      <div style={styles.content}>
+      <div style={styles.content} className="pwhl-layout-content">
         <Outlet />
       </div>
 
-      <footer style={styles.footer}>
+      <footer style={styles.footer} className="pwhl-layout-footer">
         <div style={styles.footerInner}>
           <span style={styles.footerText}>
             PdubFantasy is a product of{' '}
@@ -93,6 +88,23 @@ const PWHLLayout = () => {
           <span style={styles.footerText}>Not affiliated with the PWHL</span>
         </div>
       </footer>
+
+      {/* Mobile bottom tab bar */}
+      <nav className="pwhl-bottom-nav">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              className={`pwhl-bottom-nav-btn ${isActive ? 'active' : ''}`}
+              onClick={() => navigate(tab.path)}
+            >
+              <i className={tab.icon} />
+              <span>{tab.mobileLabel}</span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 };
@@ -103,6 +115,7 @@ const styles = {
     padding: '0 2rem',
     maxWidth: '1400px',
     margin: '0 auto',
+    boxSizing: 'border-box',
   },
   header: {
     display: 'flex',
@@ -149,48 +162,20 @@ const styles = {
     transition: 'all 0.2s ease',
     whiteSpace: 'nowrap',
   },
-  tabButtonActive: {
-    background: 'rgba(255,124,222,0.1)',
-  },
-  tabButtonHover: {
-    background: 'rgba(255,255,255,0.05)',
-  },
-  tabIcon: {
-    fontSize: '1rem',
-    transition: 'color 0.2s ease',
-  },
-  tabLabel: {
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    transition: 'color 0.2s ease',
-  },
-  content: {
-    paddingBottom: '3rem',
-  },
+  tabButtonActive: { background: 'rgba(255,124,222,0.1)' },
+  tabButtonHover:  { background: 'rgba(255,255,255,0.05)' },
+  tabIcon:  { fontSize: '1rem', transition: 'color 0.2s ease' },
+  tabLabel: { fontSize: '0.9rem', fontWeight: '600', transition: 'color 0.2s ease' },
+  content:  { paddingBottom: '3rem' },
   footer: {
     borderTop: '1px solid rgba(255,255,255,0.08)',
     padding: '1.25rem 0',
     marginTop: '2rem',
   },
-  footerInner: {
-    display: 'flex',
-    gap: '12px',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  footerText: {
-    fontSize: '0.8rem',
-    color: 'rgba(255,255,255,0.40)',
-  },
-  footerLink: {
-    color: 'var(--pink)',
-    textDecoration: 'none',
-    fontWeight: '600',
-  },
-  footerDivider: {
-    color: 'rgba(255,255,255,0.20)',
-    fontSize: '0.8rem',
-  },
+  footerInner: { display: 'flex', gap: '12px', alignItems: 'center', justifyContent: 'center' },
+  footerText:  { fontSize: '0.8rem', color: 'rgba(255,255,255,0.40)' },
+  footerLink:  { color: 'var(--pink)', textDecoration: 'none', fontWeight: '600' },
+  footerDivider: { color: 'rgba(255,255,255,0.20)', fontSize: '0.8rem' },
 };
 
 export default PWHLLayout;

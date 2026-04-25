@@ -67,7 +67,7 @@ const PWHLHub = () => {
         })}
         <button
           className="pwhl-hub-compare"
-          style={{ ...styles.subTabBtn, marginLeft: 'auto', background: 'rgba(255,124,222,0.08)', borderColor: 'rgba(255,124,222,0.2)', color: 'var(--pink)' }}
+          style={{ ...styles.subTabBtn, marginLeft: 'auto', background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
           onClick={() => setShowAnalyzer(true)}
         >
           <i className="fas fa-balance-scale" style={{ marginRight: '7px', fontSize: '0.85rem' }} />

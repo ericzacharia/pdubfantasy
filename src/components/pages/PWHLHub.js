@@ -99,17 +99,11 @@ const PWHLHub = () => {
             )}
           </div>
 
-          {/* Totals / Per Game segmented toggle */}
-          <div style={styles.typeToggle}>
-            {[['Totals', false], ['Per Game', true]].map(([label, val]) => (
-              <button
-                key={label}
-                style={{ ...styles.toggleBtn, ...(perGame === val ? styles.toggleBtnActive : {}) }}
-                onClick={() => setPerGame(val)}
-              >
-                {label}
-              </button>
-            ))}
+          {/* Totals / Per Game sliding toggle */}
+          <div style={styles.slideTrack} onClick={() => setPerGame(p => !p)} title="Toggle totals / per game">
+            <div style={{ ...styles.slideThumb, transform: perGame ? 'translateX(100%)' : 'translateX(0)' }} />
+            <span style={{ ...styles.slideLabel, color: !perGame ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: !perGame ? '700' : '400', position: 'relative' }}>Totals</span>
+            <span style={{ ...styles.slideLabel, color: perGame ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: perGame ? '700' : '400', position: 'relative' }}>Per Game</span>
           </div>
 
           {/* Season dropdown */}
@@ -161,29 +155,36 @@ const styles = {
     marginBottom: '12px',
     flexWrap: 'wrap',
   },
-  typeToggle: {
+  slideTrack: {
+    position: 'relative',
     display: 'flex',
-    background: 'rgba(255,255,255,0.05)',
-    borderRadius: '8px',
-    padding: '2px',
-    gap: '2px',
-    flexShrink: 0,
-  },
-  toggleBtn: {
-    padding: '6px 14px',
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '8px',
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: '0.8rem',
-    fontWeight: '600',
+    background: 'rgba(255,255,255,0.07)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '20px',
+    padding: '3px',
     cursor: 'pointer',
-    transition: 'all 0.2s',
+    flexShrink: 0,
+    userSelect: 'none',
   },
-  toggleBtnActive: {
-    background: 'rgba(255,124,222,0.15)',
-    borderColor: 'rgba(255,124,222,0.4)',
-    color: 'var(--pink)',
+  slideThumb: {
+    position: 'absolute',
+    top: '3px',
+    left: '3px',
+    width: 'calc(50% - 3px)',
+    height: 'calc(100% - 6px)',
+    background: 'rgba(255,124,222,0.25)',
+    border: '1px solid rgba(255,124,222,0.5)',
+    borderRadius: '16px',
+    transition: 'transform 0.2s ease',
+    pointerEvents: 'none',
+  },
+  slideLabel: {
+    flex: 1,
+    textAlign: 'center',
+    padding: '4px 14px',
+    fontSize: '0.8rem',
+    transition: 'color 0.2s, font-weight 0.2s',
+    whiteSpace: 'nowrap',
   },
   select: {
     background: '#1e0a3c',

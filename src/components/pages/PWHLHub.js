@@ -7,7 +7,7 @@ import TradeAnalyzer from '../TradeAnalyzer';
 const SEASONS = ['2025-2026', '2024-2025', '2024'];
 
 const SUB_TABS = [
-  { id: 'skaters',   label: 'Skaters',   icon: 'fas fa-hockey-puck' },
+  { id: 'skaters',   label: 'Skaters',   img: '/skater.png' },
   { id: 'goalies',   label: 'Goalies',   img: '/goalie.png' },
   { id: 'standings', label: 'Standings', icon: 'fas fa-list-ol' },
   { id: 'schedule',  label: 'Schedule',  icon: 'fas fa-calendar-alt' },

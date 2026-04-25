@@ -47,10 +47,11 @@ const GOALIE_COLS = [
 
 const POSITIONS = ['All', 'F', 'D', 'G'];
 
-const PlayersTable = ({ playerType = 'skaters', showWatchlist = false, search = '', perGame = false, selectedSeason = '2025-2026' }) => {
+const PlayersTable = ({ playerType = 'skaters', search = '', perGame = false, selectedSeason = '2025-2026' }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { toggle: toggleWatch, isWatched } = useWatchlist();
+  const { watchlist, toggle: toggleWatch, isWatched } = useWatchlist();
+  const [showWatchlist, setShowWatchlist] = useState(false);
   const [players, setPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -230,6 +231,20 @@ const PlayersTable = ({ playerType = 'skaters', showWatchlist = false, search = 
 
       {/* Team filter chips */}
       <div className="pwhl-filter-chips" style={{ marginBottom: '8px' }}>
+        {/* Watchlist chip */}
+        <button
+          className={`pwhl-chip ${showWatchlist ? 'active' : ''}`}
+          onClick={() => setShowWatchlist(w => !w)}
+          style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+        >
+          <i className={showWatchlist ? 'fas fa-star' : 'far fa-star'} style={{ fontSize: '0.75rem' }} />
+          Watchlist
+          {watchlist.size > 0 && (
+            <span style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0 6px', fontSize: '0.65rem', fontWeight: '700' }}>
+              {watchlist.size}
+            </span>
+          )}
+        </button>
         {/* "All" chip */}
         <button
           className={`pwhl-chip ${selectedTeam === 'All' ? 'active' : ''}`}

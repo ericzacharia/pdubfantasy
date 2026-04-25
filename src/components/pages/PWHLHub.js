@@ -4,8 +4,6 @@ import PlayersTable from './PlayersTable';
 import StandingsTable from './StandingsTable';
 import ScheduleView from './ScheduleView';
 import TradeAnalyzer from '../TradeAnalyzer';
-import { useWatchlist } from '../../hooks/useWatchlist';
-
 const SEASONS = ['2025-2026', '2024-2025', '2024'];
 
 const SUB_TABS = [
@@ -22,26 +20,24 @@ const PWHLHub = () => {
   const [showAnalyzer, setShowAnalyzer] = useState(false);
 
   // Shared player controls — lifted from PlayersTable
-  const [showWatchlist, setShowWatchlist] = useState(false);
   const [search, setSearch] = useState('');
   const [perGame, setPerGame] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState('2025-2026');
-  const { watchlist } = useWatchlist();
 
   const isPlayerTab = activeTab === 'skaters' || activeTab === 'goalies';
 
   const renderContent = () => {
     switch (activeTab) {
       case 'skaters':
-        return <PlayersTable playerType="skaters" showWatchlist={showWatchlist} search={search} perGame={perGame} selectedSeason={selectedSeason} />;
+        return <PlayersTable playerType="skaters" search={search} perGame={perGame} selectedSeason={selectedSeason} />;
       case 'goalies':
-        return <PlayersTable playerType="goalies" showWatchlist={showWatchlist} search={search} perGame={perGame} selectedSeason={selectedSeason} />;
+        return <PlayersTable playerType="goalies" search={search} perGame={perGame} selectedSeason={selectedSeason} />;
       case 'standings':
         return <StandingsTable />;
       case 'schedule':
         return <ScheduleView />;
       default:
-        return <PlayersTable playerType="skaters" showWatchlist={showWatchlist} search={search} perGame={perGame} selectedSeason={selectedSeason} />;
+        return <PlayersTable playerType="skaters" search={search} perGame={perGame} selectedSeason={selectedSeason} />;
     }
   };
 
@@ -81,22 +77,6 @@ const PWHLHub = () => {
       {/* Sub-controls row — only shown for player tabs */}
       {isPlayerTab && (
         <div style={styles.controlsRow}>
-          {/* Watchlist toggle */}
-          <button
-            className={`pwhl-chip ${showWatchlist ? 'active' : ''}`}
-            onClick={() => setShowWatchlist(w => !w)}
-            aria-pressed={showWatchlist}
-            style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}
-          >
-            <i className={showWatchlist ? 'fas fa-star' : 'far fa-star'} style={{ fontSize: '0.75rem' }} />
-            Watchlist
-            {watchlist.size > 0 && (
-              <span style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0 6px', fontSize: '0.65rem', fontWeight: '700' }}>
-                {watchlist.size}
-              </span>
-            )}
-          </button>
-
           {/* Search */}
           <div className="pwhl-search-wrap" style={{ flex: 1, maxWidth: '280px' }}>
             <i className="fas fa-search icon" />

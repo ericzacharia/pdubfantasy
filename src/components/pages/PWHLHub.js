@@ -119,14 +119,18 @@ const PWHLHub = () => {
             )}
           </div>
 
-          {/* Totals / Per Game toggle */}
-          <button
-            style={{ ...styles.toggleBtn, ...(perGame ? styles.toggleBtnActive : {}), flexShrink: 0 }}
-            onClick={() => setPerGame(p => !p)}
-            title="Toggle between season totals and per-game averages"
-          >
-            {perGame ? 'Per Game' : 'Totals'}
-          </button>
+          {/* Totals / Per Game segmented toggle */}
+          <div style={styles.typeToggle}>
+            {[['Totals', false], ['Per Game', true]].map(([label, val]) => (
+              <button
+                key={label}
+                style={{ ...styles.toggleBtn, ...(perGame === val ? styles.toggleBtnActive : {}) }}
+                onClick={() => setPerGame(val)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
           {/* Season dropdown */}
           <select value={selectedSeason} onChange={e => setSelectedSeason(e.target.value)} style={{ ...styles.select, flexShrink: 0 }}>
@@ -176,6 +180,14 @@ const styles = {
     alignItems: 'center',
     marginBottom: '12px',
     flexWrap: 'wrap',
+  },
+  typeToggle: {
+    display: 'flex',
+    background: 'rgba(255,255,255,0.05)',
+    borderRadius: '8px',
+    padding: '2px',
+    gap: '2px',
+    flexShrink: 0,
   },
   toggleBtn: {
     padding: '6px 14px',

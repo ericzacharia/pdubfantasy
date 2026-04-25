@@ -346,7 +346,7 @@ const PlayersTable = () => {
           { stat: 'Block',  pts: '+0.1',  color: '#93c5fd' },
           { stat: 'PIM',    pts: '−0.1',  color: '#fca5a5' },
         ] : [
-          { stat: 'Save',     pts: '+0.20', color: '#93c5fd' },
+          { stat: 'Save',     pts: '+0.17', color: '#93c5fd' },
           { stat: 'Win',      pts: '+1',    color: '#60a5fa' },
           { stat: 'Shutout',  pts: '+1.5',  color: '#34d399' },
           { stat: 'OT Loss',  pts: '+1',    color: '#ffc107' },

@@ -46,24 +46,18 @@ const GOALIE_COLS = [
 ];
 
 const POSITIONS = ['All', 'F', 'D', 'G'];
-const SEASONS = ['2025-2026', '2024-2025', '2024'];
 
-const PlayersTable = () => {
+const PlayersTable = ({ playerType = 'skaters', showWatchlist = false, search = '', perGame = false, selectedSeason = '2025-2026' }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { watchlist, toggle: toggleWatch, isWatched } = useWatchlist();
-  const [playerType, setPlayerType] = useState('skaters');
+  const { toggle: toggleWatch, isWatched } = useWatchlist();
   const [players, setPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [gameTodayIds, setGameTodayIds] = useState(new Set());
-  const [perGame, setPerGame] = useState(false);
-  const [showWatchlist, setShowWatchlist] = useState(false);
-  const [search, setSearch] = useState('');
   // Pre-select team from ?team= query param (e.g. from Trends page)
   const [selectedTeam, setSelectedTeam] = useState(searchParams.get('team') || 'All');
   const [selectedPosition, setSelectedPosition] = useState('All');
-  const [selectedSeason, setSelectedSeason] = useState('2025-2026');
   const [sortBy, setSortBy] = useState('fantasy_value');
   const [sortDir, setSortDir] = useState('desc');
   const [page, setPage] = useState(1);
@@ -138,6 +132,9 @@ const PlayersTable = () => {
   // Reset to page 1 on filter change
   useEffect(() => { setPage(1); }, [search, selectedTeam, selectedPosition, selectedSeason, playerType, sortBy]);
 
+  // Reset position filter when player type changes
+  useEffect(() => { setSelectedPosition('All'); }, [playerType]);
+
   const handleSort = (sortKey) => {
     if (!sortKey) return;
     if (sortBy === sortKey) {
@@ -185,8 +182,8 @@ const PlayersTable = () => {
   // Build abbreviation → logo_url map from fetched teams
   const teamLogoMap = teams.reduce((acc, t) => { if (t.abbreviation) acc[t.abbreviation] = t.logo_url; return acc; }, {});
   const skaterPositions = ['All', 'F', 'D'];
-  const hasActiveFilters = selectedTeam !== 'All' || selectedPosition !== 'All' || search;
-  const clearFilters = () => { setSearch(''); setSelectedTeam('All'); setSelectedPosition('All'); };
+  const hasActiveFilters = selectedTeam !== 'All' || selectedPosition !== 'All';
+  const clearFilters = () => { setSelectedTeam('All'); setSelectedPosition('All'); };
 
   // Apply watchlist filter
   const displayPlayers = showWatchlist
@@ -201,47 +198,8 @@ const PlayersTable = () => {
 
   return (
     <div>
-      {/* Controls row */}
+      {/* Filter badges + results count */}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap' }}>
-        {/* Skaters/Goalies */}
-        <div style={styles.typeToggle}>
-          {['skaters', 'goalies'].map(t => (
-            <button key={t} style={{ ...styles.toggleBtn, ...(playerType === t ? styles.toggleBtnActive : {}) }}
-              onClick={() => { setPlayerType(t); setSelectedPosition('All'); }}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Per game toggle */}
-        <button
-          style={{ ...styles.toggleBtn, ...(perGame ? styles.toggleBtnActive : {}), padding: '6px 12px', fontSize: '0.8rem' }}
-          onClick={() => setPerGame(p => !p)}
-          title="Toggle between season totals and per-game averages"
-        >
-          {perGame ? 'Per Game' : 'Totals'}
-        </button>
-
-        {/* Season */}
-        <select value={selectedSeason} onChange={e => setSelectedSeason(e.target.value)} style={styles.select}>
-          {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-
-        {/* Watchlist toggle */}
-        <button
-          className={`pwhl-chip ${showWatchlist ? 'active' : ''}`}
-          onClick={() => setShowWatchlist(w => !w)}
-          aria-pressed={showWatchlist}
-          style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
-        >
-          <i className={showWatchlist ? 'fas fa-star' : 'far fa-star'} style={{ fontSize: '0.75rem' }} />
-          Watchlist
-          {watchlist.size > 0 && (
-            <span style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0 6px', fontSize: '0.65rem', fontWeight: '700' }}>
-              {watchlist.size}
-            </span>
-          )}
-        </button>
 
         {/* Active filter badges + clear */}
         {hasActiveFilters && (
@@ -268,26 +226,7 @@ const PlayersTable = () => {
         </span>
       </div>
 
-      {/* Search */}
-      <div style={{ marginBottom: '10px', maxWidth: '360px' }}>
-        <div className="pwhl-search-wrap">
-          <i className="fas fa-search icon" />
-          <input
-            className="pwhl-input"
-            type="text"
-            placeholder="Search players..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            aria-label="Search players"
-          />
-          {search && (
-            <button onClick={() => setSearch('')} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-faint)', cursor: 'pointer' }}
-              aria-label="Clear search">
-              <i className="fas fa-times" />
-            </button>
-          )}
-        </div>
-      </div>
+
 
       {/* Team filter chips */}
       <div className="pwhl-filter-chips" style={{ marginBottom: '8px' }}>

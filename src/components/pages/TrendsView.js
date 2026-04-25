@@ -237,7 +237,7 @@ const TrendCard = ({ trend, idx, teamLogos, playerData, navigate }) => {
       <h4 style={styles.cardTitle}>{trend.title}</h4>
       <p style={styles.cardDescription}>{trend.description}</p>
 
-      {(trend.team || trend.player) && (
+      {(trend.team || trend.player || trend.author_avatar) && (
         <div style={styles.tagRow}>
           {trend.team && (
             <div
@@ -275,6 +275,20 @@ const TrendCard = ({ trend, idx, teamLogos, playerData, navigate }) => {
               </span>
             </div>
           )}
+          {trend.author_avatar && (
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '5px' }}
+              title={trend.author_name ? `Written by ${trend.author_name}` : 'AI-written article'}>
+              <img
+                src={trend.author_avatar}
+                alt={trend.author_name || 'Author'}
+                style={styles.authorAvatar}
+                onError={e => { e.target.style.display = 'none'; }}
+              />
+              {trend.author_name && (
+                <span style={styles.authorName}>{trend.author_name}</span>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -299,6 +313,8 @@ const styles = {
   tag: { display: 'flex', alignItems: 'center', padding: '3px 10px', background: 'rgba(255,255,255,0.06)', borderRadius: '20px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.80)' },
   teamTag: { display: 'flex', alignItems: 'center', gap: '6px', padding: '3px 10px', background: 'rgba(255,255,255,0.06)', borderRadius: '20px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.80)' },
   playerTag: { display: 'flex', alignItems: 'center', gap: '6px', padding: '3px 10px', background: 'rgba(255,255,255,0.06)', borderRadius: '20px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.80)', transition: 'all 0.15s' },
+  authorAvatar: { width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.15)', flexShrink: 0 },
+  authorName: { fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', whiteSpace: 'nowrap' },
 };
 
 export default TrendsView;

@@ -108,7 +108,7 @@ const PWHLHub = () => {
           </div>
 
           {/* Season dropdown */}
-          <select value={selectedSeason} onChange={e => setSelectedSeason(e.target.value)} style={{ ...styles.select, flexShrink: 0 }}>
+          <select value={selectedSeason} onChange={e => setSelectedSeason(e.target.value)} style={{ ...styles.select, flexShrink: 0, width: 'auto' }}>
             {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>

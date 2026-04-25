@@ -8,7 +8,7 @@ const SEASONS = ['2025-2026', '2024-2025', '2024'];
 
 const SUB_TABS = [
   { id: 'skaters',   label: 'Skaters',   icon: 'fas fa-hockey-puck' },
-  { id: 'goalies',   label: 'Goalies',   icon: 'fas fa-mask' },
+  { id: 'goalies',   label: 'Goalies',   img: '/goalie.png' },
   { id: 'standings', label: 'Standings', icon: 'fas fa-list-ol' },
   { id: 'schedule',  label: 'Schedule',  icon: 'fas fa-calendar-alt' },
 ];
@@ -60,14 +60,22 @@ const PWHLHub = () => {
               onMouseEnter={() => setHoveredTab(tab.id)}
               onMouseLeave={() => setHoveredTab(null)}
             >
-              <i className={tab.icon} style={{ marginRight: '7px', fontSize: '0.85rem' }} />
+              {tab.img
+                ? <img src={tab.img} alt={tab.label}
+                    style={{ width: '16px', height: '16px', marginRight: '7px', objectFit: 'contain',
+                      filter: isActive
+                        ? 'invert(1) sepia(1) saturate(4) hue-rotate(285deg) brightness(1.2)'
+                        : 'invert(1) opacity(0.8)',
+                    }} />
+                : <i className={tab.icon} style={{ marginRight: '7px', fontSize: '0.85rem' }} />
+              }
               {tab.label}
             </button>
           );
         })}
         <button
           className="pwhl-hub-compare"
-          style={{ ...styles.subTabBtn, marginLeft: 'auto', background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}
+          style={{ ...styles.subTabBtn, marginLeft: 'auto', background: 'rgba(139,92,246,0.12)', borderColor: 'rgba(139,92,246,0.35)', color: '#a78bfa' }}
           onClick={() => setShowAnalyzer(true)}
         >
           <i className="fas fa-balance-scale" style={{ marginRight: '7px', fontSize: '0.85rem' }} />

@@ -253,3 +253,38 @@ div:hover > .pwhl-star:not(.active) { color: rgba(255,193,7,0.45); }
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Mobile — narrow screens (≤500px, e.g. 390×844 iPhone) */
+@media (max-width: 500px) {
+  /* Filter chips wrap instead of scroll horizontally */
+  .pwhl-filter-chips {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  /* Tab bar wraps and Compare Players drops to its own line */
+  .pwhl-hub-tabs {
+    flex-wrap: wrap;
+  }
+  .pwhl-hub-tabs .pwhl-hub-compare {
+    margin-left: 0 !important;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Controls row: each control gets its own line */
+  .pwhl-hub-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pwhl-hub-controls .pwhl-search-wrap {
+    max-width: 100% !important;
+    flex: none;
+  }
+  .pwhl-hub-controls .pwhl-hub-slide-toggle {
+    align-self: flex-start;
+  }
+  .pwhl-hub-controls select {
+    width: 100%;
+  }
+}

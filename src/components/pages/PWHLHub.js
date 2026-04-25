@@ -44,7 +44,7 @@ const PWHLHub = () => {
   return (
     <div>
       {/* Tab bar */}
-      <div style={styles.subTabBar}>
+      <div style={styles.subTabBar} className="pwhl-hub-tabs">
         {SUB_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const isHovered = hoveredTab === tab.id;
@@ -66,6 +66,7 @@ const PWHLHub = () => {
           );
         })}
         <button
+          className="pwhl-hub-compare"
           style={{ ...styles.subTabBtn, marginLeft: 'auto', background: 'rgba(255,124,222,0.08)', borderColor: 'rgba(255,124,222,0.2)', color: 'var(--pink)' }}
           onClick={() => setShowAnalyzer(true)}
         >
@@ -76,7 +77,7 @@ const PWHLHub = () => {
 
       {/* Sub-controls row — only shown for player tabs */}
       {isPlayerTab && (
-        <div style={styles.controlsRow}>
+        <div style={styles.controlsRow} className="pwhl-hub-controls">
           {/* Search */}
           <div className="pwhl-search-wrap" style={{ flex: 1, maxWidth: '280px' }}>
             <i className="fas fa-search icon" />
@@ -100,7 +101,7 @@ const PWHLHub = () => {
           </div>
 
           {/* Totals / Per Game sliding toggle */}
-          <div style={styles.slideTrack} onClick={() => setPerGame(p => !p)} title="Toggle totals / per game">
+          <div style={styles.slideTrack} className="pwhl-hub-slide-toggle" onClick={() => setPerGame(p => !p)} title="Toggle totals / per game">
             <div style={{ ...styles.slideThumb, transform: perGame ? 'translateX(100%)' : 'translateX(0)' }} />
             <span style={{ ...styles.slideLabel, color: !perGame ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: !perGame ? '700' : '400', position: 'relative' }}>Totals</span>
             <span style={{ ...styles.slideLabel, color: perGame ? '#fff' : 'rgba(255,255,255,0.45)', fontWeight: perGame ? '700' : '400', position: 'relative' }}>Per Game</span>
